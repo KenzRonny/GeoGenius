@@ -8,7 +8,13 @@ class LogoutButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      onPressed: onLogout, // Wenn der Button gedrückt wird, wird onLogout aufgerufen
+      onPressed: (){
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Ausgeloggt')),
+        );
+      }, // Wenn der Button gedrückt wird, wird onLogout aufgerufen
+
       icon: const Icon(Icons.logout),
       color: Colors.white,
     );
