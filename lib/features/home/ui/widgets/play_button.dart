@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../Spielauswahl/ui/spielen_page.dart';
 
 class PlayButton extends StatelessWidget {
   const PlayButton({super.key});
@@ -7,7 +8,9 @@ class PlayButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // Action for Play button
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context)=>SpielenPage()),
+        );
       },
       child: Container(
         width: 200,
