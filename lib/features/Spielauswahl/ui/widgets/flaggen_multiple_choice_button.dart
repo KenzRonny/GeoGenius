@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../Guess_the_flag_multiple_choice/ui/multiple_choice_flags_page.dart';
 
 
 class MultipleChoiceFlags extends StatelessWidget{
@@ -21,8 +22,9 @@ class MultipleChoiceFlags extends StatelessWidget{
         child:Text(gameMode),
       ),
       onTap: (){
-        //Navigator.push(context,MaterialPageRoute(builder: (context)=>FlagsMultipleChoice()),
-        print('Flags Multiple Choice');
+        Navigator.push(context,MaterialPageRoute(builder: (context)=>MultipleChoiceScreen()),
+        );
+
 
       },
 
