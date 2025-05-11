@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import '../../../lernen/ui/learn_page.dart';
 class LearnButton extends StatelessWidget {
   const LearnButton({super.key});
 
@@ -7,7 +7,9 @@ class LearnButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // Action for Learn button
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context)=>LearnPage()),
+        );
       },
       child: Container(
         width: 200,
