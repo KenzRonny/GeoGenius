@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; //for loading assets
+import 'widgets/country_item_list.dart';
+import 'widgets/country_item_grid.dart';
+import 'widgets/country_item_flashcard.dart';
 
 class LearnPage extends StatefulWidget {
   const LearnPage({super.key});
@@ -15,13 +18,32 @@ class _LearnPageState extends State<LearnPage> {
   List<dynamic> filteredCountries = [];
   TextEditingController searchController = TextEditingController();
 
-   //loads the JSON file containing the countries' data from the assets.
+  String selectedContinent = "All";
+  final List<String> continents = [
+    "All",
+    "Africa",
+    "Americas",
+    "Asia",
+    "Europe",
+    "Oceania",
+    "Antarctica",
+  ];
+
+  String displayMode = "list"; // default display mode
+
+  //loads the JSON file containing the countries' data from the assets.
   Future<void> loadCountries() async {
     // Load the JSON content as a string from the assets directory.
-    String jsonString = await rootBundle.loadString('assets/json/countries/countries.json');
+    String jsonString = await rootBundle.loadString(
+      'assets/json/countries/countries.json',
+    );
     // Decode the JSON string into a List of dynamic objects.
     final List<dynamic> jsonData = jsonDecode(jsonString);
-    jsonData.sort((a, b) => (a["name"]["common"] as String).compareTo(b["name"]["common"] as String));
+    jsonData.sort(
+      (a, b) => (a["name"]["common"] as String).compareTo(
+        b["name"]["common"] as String,
+      ),
+    );
     setState(() {
       allCountries = jsonData;
       filteredCountries = jsonData;
@@ -31,10 +53,32 @@ class _LearnPageState extends State<LearnPage> {
   void filterCountries() {
     String query = searchController.text.toLowerCase();
     setState(() {
-      filteredCountries = allCountries.where((country) {
-        final String name = (country["name"]["common"] as String).toLowerCase();
-        return name.contains(query);
-      }).toList();
+      filteredCountries =
+          allCountries.where((country) {
+            //filtering by name
+            final String name =
+                (country["name"]["common"] as String).toLowerCase();
+            bool matchesName = name.contains(query);
+            //Filtering by continent
+            // Handling the potential type issue for "capital":
+            // Check the type and convert the value to a list if necessary.
+            final dynamic continentData = country["region"];
+            List<dynamic> continentList = [];
+            if (continentData is List) {
+              continentList = continentData;
+            } else if (continentData is String) {
+              continentList = [continentData];
+            }
+            final String countryContinent =
+                (continentList.isNotEmpty)
+                    ? continentList.first.toString()
+                    : "";
+            bool matchesContinent =
+                (selectedContinent == "All") ||
+                (countryContinent.toLowerCase() ==
+                    selectedContinent.toLowerCase());
+            return matchesName && matchesContinent;
+          }).toList();
     });
   }
 
@@ -64,10 +108,7 @@ class _LearnPageState extends State<LearnPage> {
               pinned: true,
               backgroundColor: Theme.of(context).primaryColor,
               expandedHeight: 50,
-              title: const Text(
-                title,
-                style: TextStyle(color: Colors.white),
-              ),
+              title: const Text(title, style: TextStyle(color: Colors.white)),
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back),
                 color: Colors.white,
@@ -75,7 +116,74 @@ class _LearnPageState extends State<LearnPage> {
                   Navigator.pop(context);
                 },
               ),
+              actions: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Center(
+                    child: Text(
+                      "view",
+                      style: const TextStyle(color: Colors.white, fontSize: 16),
+                    ),
+                  ),
+                ),
+                // Popup menu for display mode selection
+                PopupMenuButton<String>(
+                  onSelected: (String value) {
+                    setState(() {
+                      displayMode = value;
+                    });
+                  },
+                  icon: const Icon(Icons.view_compact),
+                  tooltip: "Select display mode",
+                  itemBuilder:
+                      (BuildContext context) => <PopupMenuEntry<String>>[
+                        const PopupMenuItem<String>(
+                          value: "list",
+                          child: Text("List"),
+                        ),
+                        const PopupMenuItem<String>(
+                          value: "grid",
+                          child: Text("Grid"),
+                        ),
+                        const PopupMenuItem<String>(
+                          value: "flashcard",
+                          child: Text("Flashcard"),
+                        ),
+                      ],
+                ),
+              ],
             ),
+            //Dropdown for continent filtering.
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  children: [
+                    const Text("Region : "),
+                    const SizedBox(width: 10),
+                    DropdownButton<String>(
+                      value: selectedContinent,
+                      items:
+                          continents.map((String cont) {
+                            return DropdownMenuItem<String>(
+                              value: cont,
+                              child: Text(cont),
+                            );
+                          }).toList(),
+                      onChanged: (String? value) {
+                        if (value != null) {
+                          setState(() {
+                            selectedContinent = value;
+                          });
+                          filterCountries();
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            // TextField for searching countries.
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -91,46 +199,45 @@ class _LearnPageState extends State<LearnPage> {
                 ),
               ),
             ),
+            //Display countries based on selected display mode.
             filteredCountries.isEmpty
                 ? const SliverToBoxAdapter(
-                    child: Center(child: CircularProgressIndicator()),
-                  )
-                : SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (BuildContext context, int index) {
-                        final country = filteredCountries[index];
-                        // Extract the country's name using the JSON structure.
-                        final String name = country["name"]?["common"] ?? "Unknown";
-                        // Extract the capital as a list, if available.
-                        final List? capitalList = country["capital"] as List?;
-                        final String capital = (capitalList != null && capitalList.isNotEmpty)
-                            ? capitalList.first
-                            : "No capital";
-                        // Get the URL for the country's flag image.
-                        final String flagUrl = country["flags"]?["png"] ?? "";
-                        return ListTile(
-                          leading: Container(
-                            width: 83,
-                            child: Row(
-                              children: [
-                                Text(
-                                  '${index + 1}.',
-                                  style: const TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                const SizedBox(width: 8),
-                                flagUrl.isNotEmpty
-                                    ? Image.network(flagUrl, width: 50, height: 50)
-                                    : const Icon(Icons.flag),
-                              ],
-                            ),
-                          ),
-                          title: Text(name),
-                          subtitle: Text("Capital: $capital"),
-                        );
-                      },
-                      childCount: filteredCountries.length,
-                    ),
+                  child: Center(child: CircularProgressIndicator()),
+                )
+                : displayMode == "grid"
+                ? SliverGrid(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 0.8,
                   ),
+                  delegate: SliverChildBuilderDelegate((
+                    BuildContext context,
+                    int index,
+                  ) {
+                    final country = filteredCountries[index];
+                    return CountryItemGrid(index: index, country: country);
+                  }, childCount: filteredCountries.length),
+                )
+                : displayMode == "flashcard"
+                ? SliverList(
+                  delegate: SliverChildBuilderDelegate((
+                    BuildContext context,
+                    int index,
+                  ) {
+                    final country = filteredCountries[index];
+                    return CountryItemFlashcard(index: index, country: country);
+                  }, childCount: filteredCountries.length),
+                )
+                : // Default list display
+                SliverList(
+                  delegate: SliverChildBuilderDelegate((
+                    BuildContext context,
+                    int index,
+                  ) {
+                    final country = filteredCountries[index];
+                    return CountryItemList(index: index, country: country);
+                  }, childCount: filteredCountries.length),
+                ),
           ],
         ),
       ),

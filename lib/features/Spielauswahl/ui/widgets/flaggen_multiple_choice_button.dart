@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 class MultipleChoiceFlags extends StatelessWidget{
   final String gameMode;
   const MultipleChoiceFlags({
-  Key? key,
+  super.key,
     required this.gameMode,
-}) : super(key: key);
+});
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -22,7 +22,7 @@ class MultipleChoiceFlags extends StatelessWidget{
       ),
       onTap: (){
         //Navigator.push(context,MaterialPageRoute(builder: (context)=>FlagsMultipleChoice()),
-        print('Flags Multiple Choice');
+       // print('Flags Multiple Choice');
 
       },
 
