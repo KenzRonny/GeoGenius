@@ -13,7 +13,7 @@ class CountryItemGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Retrieve country's name and flag URL.
-    final String name = country["name"]?["common"] ?? "Unknown";
+    final String name = country["translations"]["deu"]["common"] ?? "Unknown";
     final String flagUrl = country["flags"]?["png"] ?? "";
     
     return Card(

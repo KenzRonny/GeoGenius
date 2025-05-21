@@ -13,7 +13,7 @@ class CountryItemList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Retrieve country's name, capital, and flag URL.
-    final String name = country["name"]?["common"] ?? "Unknown";
+    final String name = country["translations"]["deu"]["common"] ?? "Unknown";
     final dynamic capitalData = country["capital"];
     List<dynamic> capitalList = [];
     if (capitalData is List) {

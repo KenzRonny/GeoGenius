@@ -39,11 +39,27 @@ class _LearnPageState extends State<LearnPage> {
     );
     // Decode the JSON string into a List of dynamic objects.
     final List<dynamic> jsonData = jsonDecode(jsonString);
-    jsonData.sort(
-      (a, b) => (a["name"]["common"] as String).compareTo(
-        b["name"]["common"] as String,
+
+    String normalizeName(String name) {
+  return name.toLowerCase()
+      .replaceAll('ä', 'ae')
+      .replaceAll('ö', 'oe')
+      .replaceAll('ü', 'ue')
+      .replaceAll('ß', 'ss')
+      .replaceAll('å', 'ae');
+}
+    
+   /* jsonData.sort(
+      (a, b) => (a["translations"]["deu"]["common"] as String).compareTo(
+        b["translations"]["deu"]["common"] as String,
       ),
-    );
+    );*/
+    jsonData.sort((a, b) {
+  final String aName = normalizeName(a["translations"]["deu"]["common"] as String);
+  final String bName = normalizeName(b["translations"]["deu"]["common"] as String);
+  return aName.compareTo(bName);
+});
+
     setState(() {
       allCountries = jsonData;
       filteredCountries = jsonData;
@@ -57,11 +73,9 @@ class _LearnPageState extends State<LearnPage> {
           allCountries.where((country) {
             //filtering by name
             final String name =
-                (country["name"]["common"] as String).toLowerCase();
+                (country["translations"]["deu"]["common"] as String).toLowerCase();
             bool matchesName = name.contains(query);
-            //Filtering by continent
-            // Handling the potential type issue for "capital":
-            // Check the type and convert the value to a list if necessary.
+
             final dynamic continentData = country["region"];
             List<dynamic> continentList = [];
             if (continentData is List) {
