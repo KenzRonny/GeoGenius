@@ -1,0 +1,1 @@
+{"flutter":{"platforms":{"android":{"default":{"projectId":"zapp-geogenius","appId":"1:661852163614:android:958b3cada2a1f3f7a1e80f","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"zapp-geogenius","configurations":{"android":"1:661852163614:android:958b3cada2a1f3f7a1e80f","web":"1:661852163614:web:656f2b1e03009503a1e80f"}}}}}}
