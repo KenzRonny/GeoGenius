@@ -3,6 +3,8 @@ import 'package:geo_genius/widgets/custom_bottom_nav_bar.dart';
 import 'package:geo_genius/app_state.dart';
 import 'package:provider/provider.dart';
 import 'widgets/game_modes_overview.dart';
+import 'package:geo_genius/features/lernen/ui/learn_page.dart';
+
 
 class MyHomePage extends StatelessWidget {
   const MyHomePage({super.key});
@@ -14,7 +16,7 @@ class MyHomePage extends StatelessWidget {
 
     final List<Widget> pages = [
       const GameModesOverview(), // Tab 0 – Startseite
-      const Center(child: Text('Lernen')), // Tab 1 – Lernen
+      const LearnPage(), // Tab 1 – Lernen
       const Center(child: Text('Profil')), // Tab 2 – Profil
     ];
 
