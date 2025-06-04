@@ -97,5 +97,6 @@ flutter:
   #
   assets:
     - lib/features/Guess_the_flag_multiple_choice/assets/flags/
+    - lib/assets/images/game_modes/
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
