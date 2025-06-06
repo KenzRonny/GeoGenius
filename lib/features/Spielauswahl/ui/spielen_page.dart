@@ -8,18 +8,22 @@ import 'widgets/flaggen_multiple_choice_button.dart';
 
 class SpielenPage extends StatelessWidget{
   const SpielenPage({super.key});
+
   void _logout(BuildContext context){
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ausgeloggt')),
     );
 
+
+
   }
+
 
   @override
   Widget build(BuildContext context) {
     const title = 'Spielmodie';
     final List<String> gameModes = [
-      'Guess the Flag: Multiple Choice'
+      'Guess the Flag: Multiple Choice', 'Guess the Country via Map'
     ];
     return MaterialApp(
       title: title,

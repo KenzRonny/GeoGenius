@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../Guess_the_flag_multiple_choice/ui/multiple_choice_flags_page.dart';
 
+import '../../../click_on_map_country/ui/click_on_map_country_page.dart';
 
 class MultipleChoiceFlags extends StatelessWidget{
   final String gameMode;
@@ -22,8 +23,18 @@ class MultipleChoiceFlags extends StatelessWidget{
         child:Text(gameMode),
       ),
       onTap: (){
-        Navigator.push(context,MaterialPageRoute(builder: (context)=>MultipleChoiceScreen()),
-        );
+          if(gameMode == 'Guess the Flag: Multiple Choice'){
+    Navigator.push(context,MaterialPageRoute(builder: (context)=>MultipleChoiceScreen()),
+    );
+    }
+
+          else if(gameMode == 'Guess the Country via Map'){
+            Navigator.push(context,MaterialPageRoute(builder: (context)=>ClickOnMapPage()),
+    );
+
+    }
+
+
 
 
       },
