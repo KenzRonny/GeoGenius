@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "661852163614",
+    "project_id": "zapp-geogenius",
+    "storage_bucket": "zapp-geogenius.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:661852163614:android:958b3cada2a1f3f7a1e80f",
+        "android_client_info": {
+          "package_name": "com.GeoGenius.geo_genius"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCkG0fyN-5GulHG3BrY2AlXSJhstKttqM8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

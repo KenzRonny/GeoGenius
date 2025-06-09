@@ -1,3 +1,4 @@
+
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:latlong2/latlong.dart';
@@ -11,7 +12,7 @@ List<LatLng> _convertCoordinates(List<dynamic> coordinates){
 
   return coordinates[0].map<LatLng>((point){
 
-      return LatLng(point[1].toDouble(), point[0].toDouble());
+    return LatLng(point[1].toDouble(), point[0].toDouble());
 
   }).toList();
 }
@@ -59,13 +60,13 @@ class GeoJsonParser{
 
   }
 
-Future<List<Country>> parseGeoJsonFromString(String geoJsonString)async{
-  try {
-    return compute(parseGeoJsonInBackground, geoJsonString);
-  } catch (e) {
-    // Fehler beim Parsen der GeoJson-Zeichenkette.
-    return [];
+  Future<List<Country>> parseGeoJsonFromString(String geoJsonString)async{
+    try {
+      return compute(parseGeoJsonInBackground, geoJsonString);
+    } catch (e) {
+      // Fehler beim Parsen der GeoJson-Zeichenkette.
+      return [];
+    }
   }
-}
 
 }
