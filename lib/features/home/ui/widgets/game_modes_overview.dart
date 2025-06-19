@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:geo_genius/features/home/ui/widgets/gameModeCard.dart';
 import 'package:geo_genius/features/Guess_the_flag_multiple_choice/ui/multiple_choice_flags_page.dart';
 import 'package:geo_genius/features/highscore_mode/ui/highscore_page.dart';
+import 'package:geo_genius/features/daily_challenge/daily_challenge_home.dart';
 
 class GameModesOverview extends StatelessWidget {
   const GameModesOverview({super.key});
@@ -42,7 +43,14 @@ class GameModesOverview extends StatelessWidget {
                 GameModeCard(
                   title: 'Daily Globe Trotter',
                   imagePath: 'lib/assets/images/game_modes/daily_globe_trotter.png',
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const DailyChallengeHomePage(),
+                      ),
+                    );
+                  },
                 ),
                 GameModeCard(
                   title: 'Capital Conquest',

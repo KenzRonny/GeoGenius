@@ -115,21 +115,22 @@ class _LearnPageState extends State<LearnPage> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
+        backgroundColor: Colors.amber[50],
         body: CustomScrollView(
           slivers: [
             // collapsible app bar integrated into the scrollable view.
             SliverAppBar(
               pinned: true,
-              backgroundColor: Theme.of(context).primaryColor,
+              backgroundColor: Colors.amber[800],
               expandedHeight: 50,
               title: const Text(title, style: TextStyle(color: Colors.white)),
-              leading: IconButton(
+              /*leading: IconButton(
                 icon: const Icon(Icons.arrow_back),
                 color: Colors.white,
                 onPressed: () {
                   Navigator.pop(context);
                 },
-              ),
+              ),*/
               actions: [
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
