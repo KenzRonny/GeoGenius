@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-
 import 'package:latlong2/latlong.dart';
 import 'dart:convert';
 import '../data/geojson_parse_through.dart';
@@ -35,11 +33,9 @@ class _ClickOnMapPage extends State<ClickOnMapPage> {
   List<Country> _remainingCountries = [];
   String _currentCountry = '';
   String? _selectedCountry;
-  bool _isCorrect = false;
   int _attemptCounter = 0;
   bool _isdoing = true;
   late MapShapeSource? _mapShapeSource;
-  int _tappedIndex = 0;
   String? _geoJsonRawString;
 
 
@@ -78,13 +74,13 @@ class _ClickOnMapPage extends State<ClickOnMapPage> {
       if (countries.isEmpty) {
         print("Fehler: Keine Länder geladen");
         setState(() {
-          _isdoing = false; // Set loading to false even if empty
+          _isdoing = false;
         });
         return;
       }
       setState(() {
         _countries = countries;
-        _countryColors = { for (var country in _countries) country.name!: Colors.transparent };
+        _countryColors = { for (var country in _countries) country.name: Colors.transparent };
         _mapShapeSource = MapShapeSource.memory(
           Uint8List.fromList(utf8.encode(_geoJsonRawString!)),
           shapeDataField: "name_de",
@@ -98,7 +94,7 @@ class _ClickOnMapPage extends State<ClickOnMapPage> {
           shapeColorValueMapper: (int index) {
             if (index >= 0 && index < _countries.length) {
               final countryName = _countries[index].name;
-              return _countryColors[countryName] ?? Colors.transparent;
+              return _countryColors[countryName] ?? Colors.grey.withOpacity(0.3);
             }
             return Colors.transparent;
           },
@@ -117,51 +113,18 @@ class _ClickOnMapPage extends State<ClickOnMapPage> {
     }
   }
 
-  void _initializeMapSource() {
+  MapLatLng _calculatePolygonCentroid(List<LatLng> polygon) {
+    if (polygon.isEmpty) return const MapLatLng(0, 0);
 
-
-
-    _mapShapeSource = MapShapeSource.memory(
-
-      Uint8List.fromList(utf8.encode(_geoJsonRawString!)),
-
-      shapeDataField: "name_de",
-
-      primaryValueMapper: (int index) {
-
-        if (index >= 0 && index < _countries.length) {
-
-          return _countries[index].name;
-
-        }
-
-        return 'Unknown';
-
-      },
-
-      dataCount: _countries.length,
-
-      shapeColorValueMapper: (int index) {
-
-        if (index >= 0 && index < _countries.length) {
-
-          final countryName = _countries[index].name;
-
-          return _countryColors[countryName] ?? Colors.transparent;
-
-        }
-
-        return Colors.transparent;
-
-      },
-
-    );
-
-
-
-
-
+    double latitudeSum = 0;
+    double longitudeSum = 0;
+    for (var point in polygon) {
+      latitudeSum += point.latitude;
+      longitudeSum += point.longitude;
+    }
+    return MapLatLng(latitudeSum / polygon.length, longitudeSum / polygon.length);
   }
+
 
 
 
@@ -169,7 +132,7 @@ class _ClickOnMapPage extends State<ClickOnMapPage> {
 
   void _countryTapped(int index) async {
 
-    //if (_isdoing) return;
+
     if (_countries.isEmpty) {
       print("Error: No countries loaded into _countries list.");
     }
@@ -188,12 +151,10 @@ class _ClickOnMapPage extends State<ClickOnMapPage> {
       });
 
       await Future.delayed(Duration(seconds: 1));
-      if (_zoomPanBehavior != null) {
+
         _zoomPanBehavior.reset();
 
-      } else {
-        print("Error: _zoomPanBehavior is null.");
-      }
+
       _setNextCountry();
     }
     else {
@@ -206,25 +167,30 @@ class _ClickOnMapPage extends State<ClickOnMapPage> {
 
 
       if (_attemptCounter >= 3) {
-
+        _zoomPanBehavior.reset();
         setState(() {
           _zoomPanBehavior.reset();
-          _countryColors[_currentCountry] = Colors.green;
-          _countryColors[_countries[index].name] = Colors.red;
           selectedIndex = _countries.indexWhere((country) =>
           country.name == _currentCountry);
+          _countryColors[_currentCountry] = Colors.green;
+          _countryColors[_countries[index].name] = Colors.red;
+          if (selectedIndex != -1 && _countries[selectedIndex].polygons.isNotEmpty) {
+            final MapLatLng centroid = _calculatePolygonCentroid(_countries[selectedIndex].polygons[0]);
+            _zoomPanBehavior.zoomLevel = 5;
+            _zoomPanBehavior.focalLatLng = centroid;
+          }
           _remainingCountries.removeWhere((country) =>
           country.name == _currentCountry);
           _isdoing = true;
+
+
         });
 
         await Future.delayed(Duration(seconds:1));
-        if (mounted && _zoomPanBehavior != null) {
-        }
 
 
         await Future.delayed(Duration(seconds: 2));
-        if(_zoomPanBehavior != null) {
+
           _zoomPanBehavior.reset();
 
 
@@ -233,7 +199,7 @@ class _ClickOnMapPage extends State<ClickOnMapPage> {
           }
         }
 
-      } else {
+       else {
         await Future.delayed(Duration(seconds: 1));
         setState(() {
           selectedIndex = -1;
@@ -253,7 +219,7 @@ class _ClickOnMapPage extends State<ClickOnMapPage> {
 
   void _setNextCountry() {
 
-    //if (_isdoing) return;
+
     if (_remainingCountries.isEmpty) {
       setState(() {
         _remainingCountries = List.from(_countries);
@@ -273,7 +239,7 @@ class _ClickOnMapPage extends State<ClickOnMapPage> {
       if(_countries.isNotEmpty) {
         _currentCountry = (_countries.toList()..shuffle()).first.name;
         _selectedCountry = _currentCountry;
-        _countryColors = { for (var country in _countries) country.name!: Colors.transparent};
+        _countryColors = { for (var country in _countries) country.name: Colors.grey.withOpacity(0.3)};
       }
 
     });
@@ -283,13 +249,13 @@ class _ClickOnMapPage extends State<ClickOnMapPage> {
     int randomindex = random.nextInt(_remainingCountries.length);
     final Country newCountry = _remainingCountries[randomindex];
     setState(() {
-      _currentCountry = newCountry.name!;
+      _currentCountry = newCountry.name;
       _selectedCountry = _currentCountry;
       _attemptCounter = 0;
       selectedIndex = -1;
       _isdoing = false;
 
-      _countryColors = { for (var country in _countries) country.name!: Colors.transparent };
+      _countryColors = { for (var country in _countries) country.name: Colors.grey.withOpacity(0.3) };
 
     });
   }
@@ -350,6 +316,10 @@ class _ClickOnMapPage extends State<ClickOnMapPage> {
                   strokeColor: Colors.white,
                   strokeWidth: 2,
                 ),
+                color: Colors.grey.withOpacity(0.3),
+                strokeColor: Colors.black,
+                strokeWidth: 0.5,
+
 
                 onSelectionChanged: (int index) {
                   if(!_isdoing) {

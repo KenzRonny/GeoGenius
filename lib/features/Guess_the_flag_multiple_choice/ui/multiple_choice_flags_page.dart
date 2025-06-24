@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 
 import 'widgets/logout_button.dart';
-import 'dart:math';
+
 import 'package:geo_genius/features/home/data/countries_data.dart';
 
 class MultipleChoiceScreen extends StatefulWidget{
@@ -23,25 +23,38 @@ class _MultipleChoiceScreenState extends State<MultipleChoiceScreen>{
   late List<String> options;
   Map<String, Color> boxColors = {};
   int streak = 0;
+  List<String> _remainingCountries = [];
   @override
   void initState(){
     super.initState();
     _generateQuestion();
   }
+  /*
+  void _initializeGame() {
+    _remainingCountries = CountryData.countries.keys.toList()..shuffle(); // Initialize and shuffle
+    _generateQuestion();
+  }
+
+   */
+
   void _generateQuestion(){
-    final random = Random();
-    final countries = CountryData.countries.keys.toList();
-    final flagCountry = countries[random.nextInt(countries.length)];
+    if (_remainingCountries.isEmpty) {
+      _remainingCountries = CountryData.countries.keys.toList()..shuffle();
+    }
+    //final random = Random();
+    //final countries = CountryData.countries.keys.toList();
+    final flagCountry = _remainingCountries.removeAt(0);
     final flag = CountryData.countries[flagCountry]!;
     correctCountry = flagCountry;
     flagPath = 'lib/features/Guess_the_flag_multiple_choice/assets/flags/$flag';
 
     final wrongOptions = <String>{};
+    List<String> allCountriesExceptCorrect = CountryData.countries.keys.where((country) => country != correctCountry).toList();
+    allCountriesExceptCorrect.shuffle();
     while(wrongOptions.length < 3){
-      final wrongCountry = countries[random.nextInt(countries.length)];
-      if(wrongCountry != correctCountry){
-        wrongOptions.add(wrongCountry);
-      }
+      final wrongCountry = allCountriesExceptCorrect.removeAt(0);
+      wrongOptions.add(wrongCountry);
+
     }
     options = [correctCountry,...wrongOptions];
     options.shuffle();

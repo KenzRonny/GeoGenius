@@ -230,7 +230,7 @@ class CountryData{
     'Uruguay' : 'uy.png',
     'Usbekistan' : 'uz.png',
     'Vatikanstadt' : 'va.png',
-    'Sankt Vincent und die Grenadinen' : 'vc',
+    'Sankt Vincent und die Grenadinen' : 'vc.png',
     'Venezuela' : 've.png',
     'Britische Jungferninseln' : 'vg.png',
     'Amerikanische Jungferninseln' : 'vi.png',
