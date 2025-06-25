@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:geo_genius/features/home/ui/widgets/gameModeCard.dart';
 import 'package:geo_genius/features/Guess_the_flag_multiple_choice/ui/multiple_choice_flags_page.dart';
 import 'package:geo_genius/features/highscore_mode/ui/highscore_page.dart';
+import 'package:geo_genius/features/ranked_mode/screens/ranked_lobby_screen.dart';
 
 class GameModesOverview extends StatelessWidget {
   const GameModesOverview({super.key});
@@ -69,7 +70,11 @@ class GameModesOverview extends StatelessWidget {
                 GameModeCard(
                   title: 'Ranked Rival',
                   imagePath: 'lib/assets/images/game_modes/ranked_rival.png',
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const RankedRivalPage(),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),

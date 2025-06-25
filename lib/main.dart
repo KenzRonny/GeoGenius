@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:geo_genius/features/ranked_mode/screens/game_screen.dart';
+import 'package:geo_genius/features/ranked_mode/screens/ranked_lobby_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
-
 import 'app_state.dart';
 import 'firebase_options.dart';
 import 'features/login/login_first_page.dart';
 import 'features/home/ui/home_page.dart';
+
+const devMode = false;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,7 +34,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         scaffoldBackgroundColor: Colors.white,
       ),
-      home: const AuthGate(),
+      home: devMode
+          ? const RankedRivalPage()
+          : const AuthGate(),
     );
   }
 }
