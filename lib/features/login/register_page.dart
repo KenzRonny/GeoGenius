@@ -1,8 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geo_genius/features/home/ui/home_page.dart';
 import 'package:geo_genius/features/login/login_page.dart';
-
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
 
@@ -14,11 +14,15 @@ class _RegisterPageState extends State<RegisterPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _userNameController = TextEditingController();
+  String? _selectedPhotoUrl;
+
 
   Future<void> _register() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
     final confirmPassword = _confirmPasswordController.text.trim();
+    final userName = _userNameController.text.trim();
 
     if (password != confirmPassword) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -30,8 +34,18 @@ class _RegisterPageState extends State<RegisterPage> {
     try {
       final userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
-
-      if (userCredential.user != null) {
+      final user = userCredential.user;
+      if (user != null) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .set({
+          'uid': user.uid,
+          'email': user.email,
+          'name': userName,
+          'photoUrl': _selectedPhotoUrl,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const MyHomePage()),
@@ -92,6 +106,35 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
               ),
               const SizedBox(height: 48),
+              GestureDetector(
+                onTap: () {
+                  // Später: hier könnte Bildauswahl oder Upload starten
+                  setState(() {
+                    _selectedPhotoUrl = 'https://example.com/default-avatar.png';
+                  });
+                },
+                child: CircleAvatar(
+                  radius: 70,
+                  backgroundImage: _selectedPhotoUrl != null
+                      ? NetworkImage(_selectedPhotoUrl!)
+                      : const AssetImage('lib/assets/default_avatar.png') as ImageProvider,
+                ),
+              ),
+              const SizedBox(height: 10),
+              const Text("Optional: Profilbild hinzufügen"),
+              const SizedBox(height: 20),
+              TextField(
+                controller: _userNameController,
+                decoration: InputDecoration(
+                  hintText: 'Username',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  contentPadding:
+                  const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+                ),
+              ),
+              const SizedBox(height: 20),
               TextField(
                 controller: _emailController,
                 decoration: InputDecoration(

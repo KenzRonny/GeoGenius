@@ -1,3 +1,6 @@
+import 'dart:math';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'login_page.dart';
@@ -9,17 +12,41 @@ class FirstLoginPage extends StatelessWidget {
 
   Future<void> _signInAnonymously(BuildContext context) async {
     try {
-      await FirebaseAuth.instance.signInAnonymously();
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const MyHomePage()),
-      );
+      final userCredential = await FirebaseAuth.instance.signInAnonymously();
+      final user = userCredential.user;
+
+      if (user != null) {
+        final userDoc = FirebaseFirestore.instance.collection('users').doc(user.uid);
+
+        // Nur erstellen, wenn es das Dokument noch nicht gibt
+        final docSnapshot = await userDoc.get();
+        if (!docSnapshot.exists) {
+          // Zufälligen Namen generieren: z.B. guest_837492
+          final randomNumber = Random().nextInt(900000) + 100000; // 6-stellige Zahl
+          final guestName = 'guest_$randomNumber';
+
+          await userDoc.set({
+            'name': guestName,
+            'avatarUrl': '', // Optional: Standardbild
+            'rank': '-',     // Optional: Standardrang
+            'points': 0,
+            'isGuest': true,
+            'createdAt': FieldValue.serverTimestamp(),
+          });
+        }
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const MyHomePage()),
+        );
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Fehler beim Gast-Login: $e')),
       );
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
