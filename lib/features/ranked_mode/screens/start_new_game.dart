@@ -150,7 +150,6 @@ class _StartNewGameScreenState extends State<StartNewGameScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    const primaryColor = Color(0xFFF1A059);
     const darkText = Color(0xFF181411);
 
     return Scaffold(
