@@ -477,10 +477,10 @@ class _ChallengePageState extends State<ChallengePage> {
                   showDialog(
                     context: context,
                     builder: (_) => AlertDialog(
-                      title: Text(isCorrect ? "Gut gemacht!" : "Versuchen Sie es noch einmal"),
+                      title: Text(isCorrect ? "Gut gemacht!" : "Nicht alle Antworten stimmen"),
                       content: Text(isCorrect? 
                       "Alle Antworten sind korrekt.\nScore: $finalScore/${requiredKeys.length}"
-                      :"Einige Antworten sind falsch.\nScore: $finalScore/${requiredKeys.length}",
+                      :"Versuche es morgen erneut.\nScore: $finalScore/${requiredKeys.length}",
                           
                           style: TextStyle(fontSize: 20),
                           ),
