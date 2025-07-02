@@ -1,8 +1,8 @@
 
 import 'package:flutter/material.dart';
 
-import 'widgets/logout_button.dart';
-import 'dart:math';
+
+
 import 'package:geo_genius/features/home/data/countries_data.dart';
 
 class MultipleChoiceScreen extends StatefulWidget{
@@ -14,34 +14,38 @@ class MultipleChoiceScreen extends StatefulWidget{
 
 
 class _MultipleChoiceScreenState extends State<MultipleChoiceScreen>{
-  void _logout(BuildContext context){
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ausgeloggt')),
-    );
-  }
+
+
   late String correctCountry;
   late String flagPath;
   late List<String> options;
   Map<String, Color> boxColors = {};
   int streak = 0;
+  List<String> _remainingCountries = [];
   @override
   void initState(){
     super.initState();
     _generateQuestion();
   }
+
+
   void _generateQuestion(){
-    final random = Random();
-    final countries = CountryData.countries.keys.toList();
-    final flagCountry = countries[random.nextInt(countries.length)];
+    if (_remainingCountries.isEmpty) {
+      _remainingCountries = CountryData.countries.keys.toList()..shuffle();
+    }
+
+    final flagCountry = _remainingCountries.removeAt(0);
     final flag = CountryData.countries[flagCountry]!;
     correctCountry = flagCountry;
     flagPath = 'lib/features/Guess_the_flag_multiple_choice/assets/flags/$flag';
 
     final wrongOptions = <String>{};
+    List<String> allCountriesExceptCorrect = CountryData.countries.keys.where((country) => country != correctCountry).toList();
+    allCountriesExceptCorrect.shuffle();
     while(wrongOptions.length < 3){
-      final wrongCountry = countries[random.nextInt(countries.length)];
-      if(wrongCountry != correctCountry){
-        wrongOptions.add(wrongCountry);
-      }
+      final wrongCountry = allCountriesExceptCorrect.removeAt(0);
+      wrongOptions.add(wrongCountry);
+
     }
     options = [correctCountry,...wrongOptions];
     options.shuffle();
@@ -76,6 +80,7 @@ class _MultipleChoiceScreenState extends State<MultipleChoiceScreen>{
   Widget build(BuildContext context){
     final screenSize = MediaQuery.of(context).size;
     return Scaffold(
+      backgroundColor: Colors.grey[200],
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor,
           title: Text('Multiple Choice Flaggen',
@@ -86,9 +91,7 @@ class _MultipleChoiceScreenState extends State<MultipleChoiceScreen>{
           Navigator.pop(context);
           },
         ),
-        actions: [
-          LogoutButton(onLogout: () => _logout(context)),
-        ],
+
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -129,25 +132,30 @@ class _MultipleChoiceScreenState extends State<MultipleChoiceScreen>{
 
               ),
             ),
-            SizedBox(width: 16),
-            Expanded(
-              child: Container(
-              width: double.infinity,
-              height: 150,
+            SizedBox(width: 26),
 
-
-            child:Image.asset(
+        Flexible(
+          flex:3,
+        child:Center(
+          child: SizedBox(
+            height: 150,
+            width: screenSize.width * 0.7,
+            child: Image.asset(
               flagPath,
-
               fit: BoxFit.contain,
               alignment: Alignment.center,
-
             ),
-
-              ),
             ),
-            ],
+          ),
         ),
+
+            Spacer(),
+            ],
+
+
+        ),
+
+
             SizedBox(height: 20),
             Expanded(
               child: GridView.builder(gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2,

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:geo_genius/features/capital_cities/ui/capitals_page.dart';
 import 'package:geo_genius/features/home/ui/widgets/gameModeCard.dart';
 import 'package:geo_genius/features/Guess_the_flag_multiple_choice/ui/multiple_choice_flags_page.dart';
 import 'package:geo_genius/features/highscore_mode/ui/highscore_page.dart';
+import 'package:geo_genius/features/click_on_map_country/ui/click_on_map_country_page.dart';
+
 import 'package:geo_genius/features/ranked_mode/screens/ranked_lobby_screen.dart';
 
 class GameModesOverview extends StatelessWidget {
@@ -48,12 +51,23 @@ class GameModesOverview extends StatelessWidget {
                 GameModeCard(
                   title: 'Capital Conquest',
                   imagePath: 'lib/assets/images/game_modes/capital_conquest.png',
-                  onTap: () {},
+                  onTap: (){
+                      Navigator.push(
+                        context,MaterialPageRoute(builder:(_) => const ClickOnCapitalPage(),
+                      ),
+                      );
+                      },
                 ),
                 GameModeCard(
                   title: 'World Explorer',
                   imagePath: 'lib/assets/images/game_modes/world_explorer.png',
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                        MaterialPageRoute(builder:(_) => const ClickOnMapPage(),
+                        ),
+                    );
+                  },
                 ),
                 GameModeCard(
                   title: 'Highscore Hero',
