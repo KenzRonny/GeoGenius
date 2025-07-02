@@ -32,14 +32,8 @@ class RawCountryData {
 Future<List<Ccountry>> _loadAndMergeCountryDataInBackground(RawCountryData rawData/*Map<String, String> paths*/) async {
   final String detailedGeoString = rawData.detailedJsonString;
   final String geoJsonWithPolygonsString = rawData.geoJsonString;
-  /*
-  final String detailedPath = paths['detailedPath']!;
-  final String polygonPath = paths['polygonPath']!;
 
-   */
 
-  // 1. Lade detaillierte Länderdaten
-  //final String detailedGeoString = await rootBundle.loadString(detailedPath);
   final List<dynamic> rawDetailedCountries = json.decode(detailedGeoString);
   List<Ccountry> detailedCountries = [];
   for (var rawCountry in rawDetailedCountries) {
@@ -67,7 +61,7 @@ Future<List<Ccountry>> _loadAndMergeCountryDataInBackground(RawCountryData rawDa
     if (rawCountry.containsKey('capitalInfo') && rawCountry['capitalInfo'] is Map && rawCountry['capitalInfo'].containsKey('latlng') && rawCountry['capitalInfo']['latlng'] is List && rawCountry['capitalInfo']['latlng'].length >=2) {
       capitalLatLng = LatLng(rawCountry['capitalInfo']['latlng'][0].toDouble(), rawCountry['capitalInfo']['latlng'][1].toDouble());
     } else if (rawCountry.containsKey('latlng') && rawCountry['latlng'] is List && rawCountry['latlng'].length >=2) {
-      // Fallback auf allgemeine latlng, falls capitalInfo.latlng fehlt
+
       capitalLatLng = LatLng(rawCountry['latlng'][0].toDouble(), rawCountry['latlng'][1].toDouble());
     }
 
@@ -86,7 +80,6 @@ Future<List<Ccountry>> _loadAndMergeCountryDataInBackground(RawCountryData rawDa
   //print('Detaillierte Länder geladen: ${detailedCountries.length}');
 
 
-  //final String geoJsonWithPolygonsString = await rootBundle.loadString(polygonPath);
 
   final Map<String, dynamic> geoJsonData = json.decode(geoJsonWithPolygonsString);
   if (!geoJsonData.containsKey('features') || geoJsonData['features'] is! List) {
@@ -161,7 +154,7 @@ class CountryDataLoader {
 
   Future<List<Ccountry>> loadCountriesWithPolygons() async {
     try {
-      //final String detailedCountriesPath = await rootBundle.loadString(detailedCountriesPath);
+
       final String detailedGeoString = await rootBundle.loadString(detailedCountriesPath);
       final String geoJsonWithPolygonsString = await rootBundle.loadString(geoJsonPolygonsPath);
 
@@ -170,15 +163,9 @@ class CountryDataLoader {
         geoJsonString: geoJsonWithPolygonsString,
       );
 
-      // 3. Pass the raw data (NOT paths) to the compute function
-      return compute(_loadAndMergeCountryDataInBackground, dataToProcess);
-      /*
-      return compute(_loadAndMergeCountryDataInBackground, {
-        'detailedPath': detailedCountriesPath,
-        'polygonPath': geoJsonPolygonsPath,
-      });
 
-       */
+      return compute(_loadAndMergeCountryDataInBackground, dataToProcess);
+
     } catch (e) {
       //print('Fehler beim Laden oder Zusammenführen der Länderdaten: $e');
       return [];

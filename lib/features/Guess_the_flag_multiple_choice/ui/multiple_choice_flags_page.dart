@@ -27,20 +27,13 @@ class _MultipleChoiceScreenState extends State<MultipleChoiceScreen>{
     super.initState();
     _generateQuestion();
   }
-  /*
-  void _initializeGame() {
-    _remainingCountries = CountryData.countries.keys.toList()..shuffle(); // Initialize and shuffle
-    _generateQuestion();
-  }
 
-   */
 
   void _generateQuestion(){
     if (_remainingCountries.isEmpty) {
       _remainingCountries = CountryData.countries.keys.toList()..shuffle();
     }
-    //final random = Random();
-    //final countries = CountryData.countries.keys.toList();
+
     final flagCountry = _remainingCountries.removeAt(0);
     final flag = CountryData.countries[flagCountry]!;
     correctCountry = flagCountry;
@@ -155,24 +148,7 @@ class _MultipleChoiceScreenState extends State<MultipleChoiceScreen>{
             ),
           ),
         ),
-            /*
-            Expanded(
 
-            child: SizedBox(
-              height: 150,
-
-            child:Image.asset(
-              flagPath,
-
-              fit: BoxFit.contain,
-              alignment: Alignment.center,
-
-
-            ),
-
-              ),
-            ),
-          */
             Spacer(),
             ],
 
