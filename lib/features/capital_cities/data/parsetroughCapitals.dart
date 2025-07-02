@@ -7,7 +7,7 @@ import '../domain/models/Countries_capital.dart';
 
 // Hilfsfunktion für Polygon-Konvertierung
 List<LatLng> _convertPolygonCoordinates(List<dynamic> coordinates){
-  if (coordinates.isEmpty || ! (coordinates[0] is List)) {
+  if (coordinates.isEmpty ||  (coordinates[0] is! List)) {
     return [];
   }
   // GeoJSON-Koordinaten sind oft [Longitude, Latitude]
@@ -18,18 +18,28 @@ List<LatLng> _convertPolygonCoordinates(List<dynamic> coordinates){
       return LatLng(point[1].toDouble(), point[0].toDouble());
     }
 
-    print('Warnung: Ungültiger Koordinatenpunkt im Polygon: $point');
+    //print('Warnung: Ungültiger Koordinatenpunkt im Polygon: $point');
     return LatLng(0,0);
   }).toList();
 }
 
+class RawCountryData {
+  final String detailedJsonString;
+  final String geoJsonString;
 
-Future<List<Ccountry>> _loadAndMergeCountryDataInBackground(Map<String, String> paths) async {
+  RawCountryData({required this.detailedJsonString, required this.geoJsonString});
+}
+Future<List<Ccountry>> _loadAndMergeCountryDataInBackground(RawCountryData rawData/*Map<String, String> paths*/) async {
+  final String detailedGeoString = rawData.detailedJsonString;
+  final String geoJsonWithPolygonsString = rawData.geoJsonString;
+  /*
   final String detailedPath = paths['detailedPath']!;
   final String polygonPath = paths['polygonPath']!;
 
+   */
+
   // 1. Lade detaillierte Länderdaten
-  final String detailedGeoString = await rootBundle.loadString(detailedPath);
+  //final String detailedGeoString = await rootBundle.loadString(detailedPath);
   final List<dynamic> rawDetailedCountries = json.decode(detailedGeoString);
   List<Ccountry> detailedCountries = [];
   for (var rawCountry in rawDetailedCountries) {
@@ -73,14 +83,14 @@ Future<List<Ccountry>> _loadAndMergeCountryDataInBackground(Map<String, String> 
       polygons: [],
     ));
   }
-  print('Detaillierte Länder geladen: ${detailedCountries.length}');
+  //print('Detaillierte Länder geladen: ${detailedCountries.length}');
 
 
-  final String geoJsonWithPolygonsString = await rootBundle.loadString(polygonPath);
+  //final String geoJsonWithPolygonsString = await rootBundle.loadString(polygonPath);
+
   final Map<String, dynamic> geoJsonData = json.decode(geoJsonWithPolygonsString);
-
   if (!geoJsonData.containsKey('features') || geoJsonData['features'] is! List) {
-    print('Warnung: GeoJSON Polygon-Datei hat keine oder ungültige "features"-Liste.');
+    //print('Warnung: GeoJSON Polygon-Datei hat keine oder ungültige "features"-Liste.');
     return detailedCountries;
   }
 
@@ -134,25 +144,43 @@ Future<List<Ccountry>> _loadAndMergeCountryDataInBackground(Map<String, String> 
     }
   }
 
-  print('Geladene und zusammengeführte Länder: ${detailedCountries.length}');
+  //print('Geladene und zusammengeführte Länder: ${detailedCountries.length}');
   return detailedCountries;
 }
 
 
 class CountryDataLoader {
+
   final String detailedCountriesPath;
   final String geoJsonPolygonsPath;
+
+
+
 
   CountryDataLoader({required this.detailedCountriesPath, required this.geoJsonPolygonsPath});
 
   Future<List<Ccountry>> loadCountriesWithPolygons() async {
     try {
+      //final String detailedCountriesPath = await rootBundle.loadString(detailedCountriesPath);
+      final String detailedGeoString = await rootBundle.loadString(detailedCountriesPath);
+      final String geoJsonWithPolygonsString = await rootBundle.loadString(geoJsonPolygonsPath);
+
+      final RawCountryData dataToProcess = RawCountryData(
+        detailedJsonString: detailedGeoString,
+        geoJsonString: geoJsonWithPolygonsString,
+      );
+
+      // 3. Pass the raw data (NOT paths) to the compute function
+      return compute(_loadAndMergeCountryDataInBackground, dataToProcess);
+      /*
       return compute(_loadAndMergeCountryDataInBackground, {
         'detailedPath': detailedCountriesPath,
         'polygonPath': geoJsonPolygonsPath,
       });
+
+       */
     } catch (e) {
-      print('Fehler beim Laden oder Zusammenführen der Länderdaten: $e');
+      //print('Fehler beim Laden oder Zusammenführen der Länderdaten: $e');
       return [];
     }
   }

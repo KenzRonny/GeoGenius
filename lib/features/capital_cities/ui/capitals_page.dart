@@ -7,6 +7,7 @@
   import 'package:syncfusion_flutter_core/theme.dart';
   import 'dart:math';
 
+
   class ClickOnCapitalPage extends StatefulWidget {
     const ClickOnCapitalPage({super.key});
 
@@ -98,7 +99,7 @@
 
         _setNextCapitalQuestion();
       } catch (e) {
-        print("Fehler beim Laden oder Parsen der Länderdaten: $e");
+        //print("Fehler beim Laden oder Parsen der Länderdaten: $e");
         setState(() {
           _errorMessage = 'Fehler beim Laden der Länderdaten: $e';
           _isLoading = false;
@@ -300,18 +301,18 @@
                         final Ccountry tappedCountry = _allCountries[index];
 
                         if (_correctCountryForQuestion != null && tappedCountry.name == _correctCountryForQuestion!.name) {
-                          return Colors.green.withOpacity(0.7);
+                          return Colors.green.withAlpha((255 * 0.7).round());
                         } else {
-                          return Colors.red.withOpacity(0.7);
+                          return Colors.red.withAlpha((255 * 0.7).round());
                         }
 
 
                       }
 
                       if (_remainingCountriesForGame.any((c) => c.name == _allCountries[index].name)) {
-                        return Colors.grey.withOpacity(0.3);
+                        return Colors.grey.withAlpha((255 * 0.3).round());
                       }
-                      return Colors.blueGrey.withOpacity(0.1);
+                      return Colors.blueGrey.withAlpha((255 * 0.1).round());
                     },
 
                   ),
@@ -337,7 +338,7 @@
                     strokeColor: Colors.white,
                     strokeWidth: 2,
                   ),
-                  color: Colors.grey.withOpacity(0.3),
+                  color: Colors.grey.withAlpha((255 * 0.3).round()),
                   strokeColor: Colors.black,
                   strokeWidth: 0.5,
                   showDataLabels: _currentZoomLevel >= _dataLabelMinZoomLevel,

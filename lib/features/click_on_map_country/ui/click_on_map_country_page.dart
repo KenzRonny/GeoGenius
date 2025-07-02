@@ -3,7 +3,6 @@ import 'package:latlong2/latlong.dart';
 import 'dart:convert';
 import '../data/geojson_parse_through.dart';
 import '../domain/models/country.dart';
-import '../../home/ui/widgets/logout_button.dart';
 import 'package:syncfusion_flutter_maps/maps.dart';
 import 'dart:math';
 import 'dart:typed_data';
@@ -17,11 +16,7 @@ class ClickOnMapPage extends StatefulWidget{
 
 
 class _ClickOnMapPage extends State<ClickOnMapPage> {
-  void _logout(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Ausgeloggt')),
-    );
-  }
+
 
   late MapZoomPanBehavior _zoomPanBehavior;
   int selectedIndex = -1;
@@ -72,7 +67,7 @@ class _ClickOnMapPage extends State<ClickOnMapPage> {
 
 
       if (countries.isEmpty) {
-        print("Fehler: Keine Länder geladen");
+        //print("Fehler: Keine Länder geladen");
         setState(() {
           _isdoing = false;
         });
@@ -94,7 +89,7 @@ class _ClickOnMapPage extends State<ClickOnMapPage> {
           shapeColorValueMapper: (int index) {
             if (index >= 0 && index < _countries.length) {
               final countryName = _countries[index].name;
-              return _countryColors[countryName] ?? Colors.grey.withOpacity(0.3);
+              return _countryColors[countryName] ?? Colors.grey.withAlpha((255 * 0.3).round());
             }
             return Colors.transparent;
           },
@@ -105,7 +100,7 @@ class _ClickOnMapPage extends State<ClickOnMapPage> {
       });
 
     } catch (e) {
-      print("Fehler beim Laden der GeoJson-Daten: $e");
+      //print("Fehler beim Laden der GeoJson-Daten: $e");
       setState(() {
         _isdoing = false;
       });
@@ -134,7 +129,7 @@ class _ClickOnMapPage extends State<ClickOnMapPage> {
 
 
     if (_countries.isEmpty) {
-      print("Error: No countries loaded into _countries list.");
+      //print("Error: No countries loaded into _countries list.");
     }
 
     String tappedCountryName = _countries[index].name;
@@ -226,12 +221,12 @@ class _ClickOnMapPage extends State<ClickOnMapPage> {
       });
     }
     if (_remainingCountries.isEmpty) {
-      print("Remaining List is empty:reinitializing");
+      //print("Remaining List is empty:reinitializing");
       _remainingCountries = List.from(_countries);
 
     }
     if (_remainingCountries.isEmpty) {
-      print("Remaining Countries are still empty");
+      //print("Remaining Countries are still empty");
       return;
     }
     setState(() {
@@ -239,7 +234,7 @@ class _ClickOnMapPage extends State<ClickOnMapPage> {
       if(_countries.isNotEmpty) {
         _currentCountry = (_countries.toList()..shuffle()).first.name;
         _selectedCountry = _currentCountry;
-        _countryColors = { for (var country in _countries) country.name: Colors.grey.withOpacity(0.3)};
+        _countryColors = { for (var country in _countries) country.name: Colors.grey.withAlpha((255 * 0.3).round())};
       }
 
     });
@@ -255,7 +250,7 @@ class _ClickOnMapPage extends State<ClickOnMapPage> {
       selectedIndex = -1;
       _isdoing = false;
 
-      _countryColors = { for (var country in _countries) country.name: Colors.grey.withOpacity(0.3) };
+      _countryColors = { for (var country in _countries) country.name: Colors.grey.withAlpha((255 * 0.3).round()) };
 
     });
   }
@@ -293,9 +288,7 @@ class _ClickOnMapPage extends State<ClickOnMapPage> {
             Navigator.pop(context);
           },
         ),
-        actions: [
-          LogoutButton(onLogout: () => _logout(context)),
-        ],
+
 
 
       ),
@@ -316,7 +309,7 @@ class _ClickOnMapPage extends State<ClickOnMapPage> {
                   strokeColor: Colors.white,
                   strokeWidth: 2,
                 ),
-                color: Colors.grey.withOpacity(0.3),
+                color: Colors.grey.withAlpha((255 * 0.3).round()),
                 strokeColor: Colors.black,
                 strokeWidth: 0.5,
 

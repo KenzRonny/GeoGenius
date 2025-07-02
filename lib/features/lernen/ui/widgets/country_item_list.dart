@@ -29,7 +29,7 @@ class CountryItemList extends StatelessWidget {
     final String flagUrl = country["flags"]?["png"] ?? "";
     
     return ListTile(
-      leading: Container(
+      leading: SizedBox(
         width: 83,
         child: Row(
           children: [

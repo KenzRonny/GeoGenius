@@ -54,7 +54,7 @@ class GeoJsonParser{
       return compute(parseGeoJsonInBackground, geoJsonString);
 
     }catch(e){
-      print('Fehler beim Laden oder Parsen der GeoJson-Datei: $e');
+      //print('Fehler beim Laden oder Parsen der GeoJson-Datei: $e');
       return[];
     }
 

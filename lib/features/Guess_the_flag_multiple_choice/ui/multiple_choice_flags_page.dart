@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 
-import 'widgets/logout_button.dart';
+
 
 import 'package:geo_genius/features/home/data/countries_data.dart';
 
@@ -14,10 +14,8 @@ class MultipleChoiceScreen extends StatefulWidget{
 
 
 class _MultipleChoiceScreenState extends State<MultipleChoiceScreen>{
-  void _logout(BuildContext context){
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ausgeloggt')),
-    );
-  }
+
+
   late String correctCountry;
   late String flagPath;
   late List<String> options;
@@ -89,6 +87,7 @@ class _MultipleChoiceScreenState extends State<MultipleChoiceScreen>{
   Widget build(BuildContext context){
     final screenSize = MediaQuery.of(context).size;
     return Scaffold(
+      backgroundColor: Colors.grey[200],
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor,
           title: Text('Multiple Choice Flaggen',
@@ -99,9 +98,7 @@ class _MultipleChoiceScreenState extends State<MultipleChoiceScreen>{
           Navigator.pop(context);
           },
         ),
-        actions: [
-          LogoutButton(onLogout: () => _logout(context)),
-        ],
+
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -142,12 +139,27 @@ class _MultipleChoiceScreenState extends State<MultipleChoiceScreen>{
 
               ),
             ),
-            SizedBox(width: 16),
-            Expanded(
-              child: Container(
-              width: double.infinity,
-              height: 150,
+            SizedBox(width: 26),
 
+        Flexible(
+          flex:3,
+        child:Center(
+          child: SizedBox(
+            height: 150,
+            width: screenSize.width * 0.7,
+            child: Image.asset(
+              flagPath,
+              fit: BoxFit.contain,
+              alignment: Alignment.center,
+            ),
+            ),
+          ),
+        ),
+            /*
+            Expanded(
+
+            child: SizedBox(
+              height: 150,
 
             child:Image.asset(
               flagPath,
@@ -155,12 +167,19 @@ class _MultipleChoiceScreenState extends State<MultipleChoiceScreen>{
               fit: BoxFit.contain,
               alignment: Alignment.center,
 
+
             ),
 
               ),
             ),
+          */
+            Spacer(),
             ],
+
+
         ),
+
+
             SizedBox(height: 20),
             Expanded(
               child: GridView.builder(gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2,
