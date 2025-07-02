@@ -455,6 +455,7 @@ class _ChallengePageState extends State<ChallengePage> {
                   _selectedAnswers.forEach((key, value) {
                     if (value == correctAnswers[key]) {
                       correctCount++;
+                      }else{
                       isCorrect = false;
                     }
                   });
@@ -477,9 +478,9 @@ class _ChallengePageState extends State<ChallengePage> {
                     context: context,
                     builder: (_) => AlertDialog(
                       title: Text(isCorrect ? "Gut gemacht!" : "Versuchen Sie es noch einmal"),
-                      content: Text(isCorrect
-                          ? "Alle Antworten sind korrekt.\nScore: $finalScore/${requiredKeys.length}"
-                            : "Einige Antworten sind falsch.\nScore: $finalScore/${requiredKeys.length}",
+                      content: Text(isCorrect? 
+                      "Alle Antworten sind korrekt.\nScore: $finalScore/${requiredKeys.length}"
+                      :"Einige Antworten sind falsch.\nScore: $finalScore/${requiredKeys.length}",
                           
                           style: TextStyle(fontSize: 20),
                           ),
