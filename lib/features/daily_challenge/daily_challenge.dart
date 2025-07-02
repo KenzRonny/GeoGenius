@@ -13,6 +13,8 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../daily_challenge/firebase_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 /// Model for Country data 
 class Country {
@@ -408,7 +410,11 @@ class _ChallengePageState extends State<ChallengePage> {
             const SizedBox(height: 30),
             Center(
               child: ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
+                  //
+                  final uid = FirebaseAuth.instance.currentUser?.uid;
+                  if (uid == null) return;
+                  //
                   // Determine required keys based on givenType.
                   List<String> requiredKeys;
                   if (_challenge!.givenType == 'capital') {
@@ -445,18 +451,35 @@ class _ChallengePageState extends State<ChallengePage> {
 
                   setState(() { _submitted = true; });
                   bool isCorrect = true;
+                  int correctCount = 0; /// Counter for corrects Answers
                   _selectedAnswers.forEach((key, value) {
-                    if (value != correctAnswers[key]) {
+                    if (value == correctAnswers[key]) {
+                      correctCount++;
                       isCorrect = false;
                     }
                   });
+
+                  final int finalScore = correctCount;
+                  final List<dynamic> userAnswers =
+                      requiredKeys
+                          .map((key) => {
+                                'question': key,
+                                'answer': _selectedAnswers[key]
+                              }).toList();
+
+                  await DailyChallengeService
+                      .submitChallenge(
+                    uid: uid,
+                    score: finalScore,
+                    answers: userAnswers,
+                  );
                   showDialog(
                     context: context,
                     builder: (_) => AlertDialog(
                       title: Text(isCorrect ? "Gut gemacht!" : "Versuchen Sie es noch einmal"),
                       content: Text(isCorrect
-                          ? "Alle Antworten sind korrekt."
-                          : "Einige Antworten sind falsch.",
+                          ? "Alle Antworten sind korrekt.\nScore: $finalScore/${requiredKeys.length}"
+                            : "Einige Antworten sind falsch.\nScore: $finalScore/${requiredKeys.length}",
                           
                           style: TextStyle(fontSize: 20),
                           ),
@@ -464,7 +487,6 @@ class _ChallengePageState extends State<ChallengePage> {
                         TextButton(
                           onPressed: () {
                             Navigator.of(context).pop();
-                            // Optionally, reset or generate a new challenge.
                           },
                           child: const Text("OK",
                           style: TextStyle(fontSize: 20, color: Colors.black),
