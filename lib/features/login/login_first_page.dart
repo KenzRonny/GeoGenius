@@ -29,7 +29,7 @@ class FirstLoginPage extends StatelessWidget {
             'name': guestName,
             'avatarUrl': '', // Optional: Standardbild
             'rank': '-',     // Optional: Standardrang
-            'points': 0,
+            'rankedPoints': 0,
             'isGuest': true,
             'createdAt': FieldValue.serverTimestamp(),
           });

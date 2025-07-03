@@ -306,7 +306,7 @@ class _GameScreenState extends State<GameScreen> {
 
       await FirebaseFirestore.instance.collection('matches').doc(widget.matchId).update(updateData);
 
-      final finalMatchSnapshot = await FirebaseFirestore.instance.collection('matchaces').doc(widget.matchId).get();
+      final finalMatchSnapshot = await FirebaseFirestore.instance.collection('matches').doc(widget.matchId).get();
       final finalMatchData = finalMatchSnapshot.data();
 
       if (finalMatchData != null) {
@@ -362,9 +362,12 @@ class _GameScreenState extends State<GameScreen> {
       tx.update(winnerRef, {
         'rankedPoints': currentWinnerPoints + 10 + bonus,
       });
+      final newLoserPoints = (currentLoserPoints - 5).clamp(0, double.infinity).toInt();
+
       tx.update(loserRef, {
-        'rankedPoints': currentLoserPoints - 5,
+        'rankedPoints': newLoserPoints,
       });
+
     });
   }
 

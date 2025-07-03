@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geo_genius/features/profile_page/profile_screen.dart';
 import 'package:geo_genius/widgets/custom_bottom_nav_bar.dart';
 import 'package:geo_genius/app_state.dart';
 import 'package:provider/provider.dart';
@@ -17,7 +18,7 @@ class MyHomePage extends StatelessWidget {
     final List<Widget> pages = [
       const GameModesOverview(), // Tab 0 – Startseite
       const LearnPage(), // Tab 1 – Lernen
-      const Center(child: Text('Profil')), // Tab 2 – Profil
+      const ProfilePage(), // Tab 2 – Profil
     ];
 
     return Scaffold(
@@ -26,12 +27,6 @@ class MyHomePage extends StatelessWidget {
         backgroundColor: Colors.white,
         centerTitle: true,
         title: const Text('GeoGenius'),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 16),
-            child: Icon(Icons.settings),
-          ),
-        ],
         elevation: 0,
       ),
       body: pages[currentIndex],

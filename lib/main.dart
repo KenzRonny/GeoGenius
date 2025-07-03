@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:geo_genius/features/ranked_mode/screens/game_screen.dart';
 import 'package:geo_genius/features/ranked_mode/screens/ranked_lobby_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
