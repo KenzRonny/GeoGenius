@@ -71,15 +71,15 @@ class RankedRivalPage extends StatelessWidget {
                   final userData = snapshot.data!.data() as Map<String, dynamic>;
                   final name = userData['name'] ?? 'Unbekannt';
                   final avatarUrl = userData['avatarUrl'] ?? '';
-                  final points = userData['points'] ?? 0;
+                  final rankedPoints = userData['rankedPoints'] ?? 0;
                   String rank;
-                  if (points >= 200) {
+                  if (rankedPoints >= 200) {
                     rank = 'Gold 🥇';
-                  } else if (points >= 100) {
+                  } else if (rankedPoints >= 100) {
                     rank = 'Silber 🥈';
-                  } else {
+                  } else if (rankedPoints >=1) {
                     rank = 'Bronze 🥉';
-                  }
+                  } else { rank = ''; }
 
 
                   return Column(
@@ -93,7 +93,7 @@ class RankedRivalPage extends StatelessWidget {
                       const SizedBox(height: 12),
                       Text(name, style: theme.textTheme.titleLarge),
                       Text('Rang $rank', style: theme.textTheme.titleMedium),
-                      Text('$points Punkte', style: theme.textTheme.titleMedium),
+                      Text('$rankedPoints Punkte', style: theme.textTheme.titleMedium),
                     ],
                   );
                 },

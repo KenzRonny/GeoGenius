@@ -45,6 +45,7 @@ class _RegisterPageState extends State<RegisterPage> {
           'name': userName,
           'photoUrl': _selectedPhotoUrl,
           'createdAt': FieldValue.serverTimestamp(),
+          'rankedPoint': '0',
         });
         Navigator.pushReplacement(
           context,

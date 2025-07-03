@@ -34,8 +34,18 @@ class ProfilePage extends StatelessWidget {
             final name = data['name'] ?? 'Unbekannt';
             final email = user.email ?? '';
             final avatarUrl = data['avatarurl'];
-            final points = data['points']?.toString() ?? '0';
-            final rank = data['rank'] ?? 'Unranked';
+            final int points = (data['rankedPoints'] ?? 0) is int
+                ? data['rankedPoints']
+                : int.tryParse(data['rankedPoints'].toString()) ?? 0;
+
+            String rank = '';
+            if (points >= 200) {
+              rank = 'Gold 🥇';
+            } else if (points >= 100) {
+              rank = 'Silber 🥈';
+            } else if (points >= 1) {
+              rank = 'Bronze 🥉';
+            }
 
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -53,27 +63,30 @@ class ProfilePage extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(email, style: const TextStyle(color: Colors.grey, fontSize: 16)),
                   const SizedBox(height: 32),
+
+                  // Rank & Points Box
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
                       color: Colors.grey[100],
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(16),
                     ),
-                    child: Row(
+                    child: Column(
                       children: [
-                        const Icon(Icons.emoji_events, size: 28, color: Colors.black87),
-                        const SizedBox(width: 16),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("Rank: $rank", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                            Text("Points: $points", style: const TextStyle(color: Colors.grey, fontSize: 14)),
-                          ],
-                        )
+                        const Icon(Icons.emoji_events, size: 48, color: Colors.amber),
+                        const SizedBox(height: 12),
+                        Text(rank.isNotEmpty ? "Rang: $rank" : "Noch kein Rang",
+                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 8),
+                        Text("Punkte: $points",
+                            style: const TextStyle(fontSize: 16, color: Colors.black87)),
                       ],
                     ),
                   ),
+
                   const Spacer(),
+
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -83,8 +96,8 @@ class ProfilePage extends StatelessWidget {
                           builder: (context) => AlertDialog(
                             title: const Text('Logout bestätigen'),
                             content: const Text(
-                                'Bist du sicher, dass du dich abmelden möchtest? '
-                                    'Wenn du als Gast angemeldet bist, gehen deine Daten verloren.'
+                              'Bist du sicher, dass du dich abmelden möchtest? '
+                                  'Wenn du als Gast angemeldet bist, gehen deine Daten verloren.',
                             ),
                             actions: [
                               TextButton(
