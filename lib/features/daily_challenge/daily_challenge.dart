@@ -1,237 +1,18 @@
 /*
   This page displays a "Daily Challenge" quiz that tests the user’s knowledge about countries.
   It loads country data from an "countries.json" file in assets, randomly generates a challenge with 6 questions,
-  and displays the questions  Depending on the randomly selected main index (flag, name, or capital),
+  and displays the questions. Depending on the randomly selected main index (flag, name, or capital),
   one or two "inverted" questions are generated (asking for the missing information), and the rest are standard questions.
   The user must answer all questions before validation is allowed.
   When the "Validieren" button is pressed, the correct answers are highlighted in green; any wrong answer chosen
   appears in red.
 */
 
-
-import 'dart:convert';
-import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import '../daily_challenge/firebase_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
-/// Model for Country data 
-class Country {
-  final String name;
-  final List<String> languages;
-  final int population;
-  final int area;
-  final String continent;
-  final String flagAsset;
-  final String capital;
-
-  Country({
-    required this.name,
-    required this.languages,
-    required this.population,
-    required this.area,
-    required this.continent,
-    required this.flagAsset,
-    required this.capital,
-  });
-
-  factory Country.fromJson(Map<String, dynamic> json) {
-    // Get the common german name or default to 'Unknown'
-    final name = (json['name'] is Map && json["translations"]["deu"]["common"] != null)
-        ? json["translations"]["deu"]["common"] as String
-        : 'Unknown';
-
-    // Process languages if available, otherwise an empty list.
-    final languagesData = json['languages'];
-    List<String> languages = [];
-    if (languagesData is Map<String, dynamic>) {
-      languages = List<String>.from(languagesData.values);
-    }
-
-    // Get population and area (with default values if missing)
-    final population = json['population'] is int ? json['population'] as int : 0;
-    final area = json['area'] is num ? (json['area'] as num).toInt() : 0;
-
-    // Get the first continent from the list or default to 'Unknown'
-    final continentsData = json['continents'];
-    final continent =
-        (continentsData is List && continentsData.isNotEmpty)
-            ? continentsData[0] as String
-            : 'Unknown';
-
-    // Get flag asset  from the 'png' field.
-    final flagData = json['flags'];
-    final flagAsset = (flagData is Map && flagData['png'] != null)
-        ? flagData['png'] as String
-        : '';
-
-    // Get capital (first element of the capital list) or default to 'Unknown'
-    final capitalData = json['capital'];
-    final capital =
-        (capitalData is List && capitalData.isNotEmpty)
-            ? capitalData[0] as String
-            : 'Unknown';
-
-    return Country(
-      name: name,
-      languages: languages,
-      population: population,
-      area: area,
-      continent: continent,
-      flagAsset: flagAsset,
-      capital: capital,
-    );
-  }
-}
-
-/// Loads the JSON file  from assets.
-Future<List<Country>> loadCountries() async {
-  try {
-    final jsonString = await rootBundle.loadString('assets/json/countries/countries.json');
-    final List<dynamic> data = jsonDecode(jsonString);
-    return data
-        .where((item) => item != null)
-        .map((item) => Country.fromJson(item as Map<String, dynamic>))
-        .toList();
-  } catch (e) {
-    print("Error loading or parsing JSON: $e");
-    rethrow;
-  }
-}
-
-
-class ChallengeQuestion {
-  final Country country;
-  final String givenType; // "flag", "name", or "capital"
-  final List<String>? invertedNameOptions;
-  final List<String>? invertedFlagOptions;
-  final List<String> languageOptions;
-  final List<int> populationOptions;
-  final List<int> areaOptions;
-  final List<String> continentOptions;
-  final List<String> capitalOptions; // Shown only if givenType is not "capital"
-
-  ChallengeQuestion({
-    required this.country,
-    required this.givenType,
-    this.invertedNameOptions,
-    this.invertedFlagOptions,
-    required this.languageOptions,
-    required this.populationOptions,
-    required this.areaOptions,
-    required this.continentOptions,
-    required this.capitalOptions,
-  });
-}
-
-/// Generates a list of string options excluding the correct value.
-List<String> generateStringOptions(String correctValue, List<String> allValues) {
-  final filtered = allValues.where((v) => v != correctValue).toList();
-  if (filtered.length < 2) return [correctValue];
-  filtered.shuffle();
-  List<String> options = [correctValue, filtered[0], filtered[1]];
-  options.shuffle();
-  return options;
-}
-
-/// Generates a list of integer options excluding the correct value.
-List<int> generateIntOptions(int correctValue, List<int> allValues) {
-  final filtered = allValues.where((v) => v != correctValue).toList();
-  if (filtered.length < 2) return [correctValue];
-  filtered.shuffle();
-  List<int> options = [correctValue, filtered[0], filtered[1]];
-  options.shuffle();
-  return options;
-}
-
-/// Generates a full challenge based on the list of countries.
-ChallengeQuestion generateChallenge(List<Country> countries) {
-  final random = Random();
-  final Country selectedCountry = countries[random.nextInt(countries.length)];
-  const possibleIndices = ["flag", "name", "capital"];
-  final String givenType = possibleIndices[random.nextInt(possibleIndices.length)];
-
-  List<String>? invNameOptions;
-  List<String>? invFlagOptions;
-  List<String> stdCapitalOptions;
-
-  // Standard options for language, population, area, and continent.
-  final languageCandidates = countries
-      .where((c) => c.name != selectedCountry.name && c.languages.isNotEmpty)
-      .map((c) => c.languages.first)
-      .toList();
-  final languageOptions = generateStringOptions(
-    selectedCountry.languages.isNotEmpty ? selectedCountry.languages.first : 'Unknown',
-    languageCandidates,
-  );
-
-  final populationCandidates = countries
-      .where((c) => c.name != selectedCountry.name)
-      .map((c) => c.population)
-      .toList();
-  final populationOptions = generateIntOptions(selectedCountry.population, populationCandidates);
-
-  final areaCandidates = countries
-      .where((c) => c.name != selectedCountry.name)
-      .map((c) => c.area)
-      .toList();
-  final areaOptions = generateIntOptions(selectedCountry.area, areaCandidates);
-
-  final continentCandidates = countries
-      .where((c) => c.name != selectedCountry.name)
-      .map((c) => c.continent)
-      .toList();
-  final continentOptions = generateStringOptions(selectedCountry.continent, continentCandidates);
-
-  // Standard capital question is shown only if givenType is not "capital"
-  if (givenType != 'capital') {
-    final capitalCandidates = countries
-        .where((c) => c.name != selectedCountry.name)
-        .map((c) => c.capital)
-        .toList();
-    stdCapitalOptions = generateStringOptions(selectedCountry.capital, capitalCandidates);
-  } else {
-    stdCapitalOptions = [];
-  }
-
-  // Inverted questions
-  if (givenType == 'flag') {
-    // If the main index is "flag", then ask for the country's name.
-    List<String> wrongNames = countries.map((c) => c.name).toList();
-    invNameOptions = generateStringOptions(selectedCountry.name, wrongNames);
-  }
-  if (givenType == 'name') {
-    // If the main index is "name", then ask for the flag.
-    List<String> wrongFlags = countries.map((c) => c.flagAsset).toList();
-    invFlagOptions = generateStringOptions(selectedCountry.flagAsset, wrongFlags);
-  }
-  if (givenType == 'capital') {
-    // For "capital", add two inverted questions: one for the name and one for the flag.
-    List<String> wrongNames = countries.map((c) => c.name).toList();
-    invNameOptions = generateStringOptions(selectedCountry.name, wrongNames);
-    List<String> wrongFlags = countries.map((c) => c.flagAsset).toList();
-    invFlagOptions = generateStringOptions(selectedCountry.flagAsset, wrongFlags);
-  }
-
-  return ChallengeQuestion(
-    country: selectedCountry,
-    givenType: givenType,
-    invertedNameOptions: invNameOptions,
-    invertedFlagOptions: invFlagOptions,
-    languageOptions: languageOptions,
-    populationOptions: populationOptions,
-    areaOptions: areaOptions,
-    continentOptions: continentOptions,
-    capitalOptions: stdCapitalOptions,
-  );
-}
-
-
-String displayOption(String questionKey, dynamic option) {
-  return option.toString();
-}
-
+import '../daily_challenge/countries_data.dart';
+import '../daily_challenge/challenge_generator.dart';
+import '../daily_challenge/firebase_service.dart';
 
 class ChallengePage extends StatefulWidget {
   const ChallengePage({super.key});
@@ -300,7 +81,7 @@ class _ChallengePageState extends State<ChallengePage> {
 
     return Scaffold(
       backgroundColor: Colors.amber[100],
-      appBar: AppBar(title: const Text('Daily Challenge'),backgroundColor: Colors.orange,),
+      appBar: AppBar(title: const Text('Daily Challenge'), backgroundColor: Colors.orange,),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -309,6 +90,7 @@ class _ChallengePageState extends State<ChallengePage> {
             // Display the main index.
             buildIndicePrincipal(),
             const SizedBox(height: 50),
+
             // Inverted questions based on givenType.
             if (_challenge!.givenType == 'flag')
               buildQuestionSection<String>(
@@ -321,6 +103,7 @@ class _ChallengePageState extends State<ChallengePage> {
                   setState(() { _selectedAnswers['name'] = value; });
                 },
               ),
+
             if (_challenge!.givenType == 'name')
               buildFlagQuestionSection(
                 questionKey: 'flag',
@@ -332,6 +115,7 @@ class _ChallengePageState extends State<ChallengePage> {
                   setState(() { _selectedAnswers['flag'] = value; });
                 },
               ),
+
             if (_challenge!.givenType == 'capital') ...[
               buildQuestionSection<String>(
                 questionKey: 'name',
@@ -354,6 +138,7 @@ class _ChallengePageState extends State<ChallengePage> {
                 },
               ),
             ],
+
             // Standard questions.
             buildQuestionSection<String>(
               questionKey: 'language',
@@ -365,6 +150,7 @@ class _ChallengePageState extends State<ChallengePage> {
                 setState(() { _selectedAnswers['language'] = value; });
               },
             ),
+
             buildQuestionSection<int>(
               questionKey: 'population',
               questionText: "Wie viele Einwohner hat das Land?",
@@ -375,6 +161,7 @@ class _ChallengePageState extends State<ChallengePage> {
                 setState(() { _selectedAnswers['population'] = value; });
               },
             ),
+
             buildQuestionSection<int>(
               questionKey: 'area',
               questionText: "Wie groß ist die Fläche (in km²)?",
@@ -385,6 +172,7 @@ class _ChallengePageState extends State<ChallengePage> {
                 setState(() { _selectedAnswers['area'] = value; });
               },
             ),
+
             buildQuestionSection<String>(
               questionKey: 'continent',
               questionText: "Auf welchem Kontinent liegt das Land?",
@@ -395,6 +183,7 @@ class _ChallengePageState extends State<ChallengePage> {
                 setState(() { _selectedAnswers['continent'] = value; });
               },
             ),
+
             // Show the capital question only if givenType is not "capital"
             if (_challenge!.givenType != 'capital')
               buildQuestionSection<String>(
@@ -407,14 +196,14 @@ class _ChallengePageState extends State<ChallengePage> {
                   setState(() { _selectedAnswers['capital'] = value; });
                 },
               ),
+
             const SizedBox(height: 30),
             Center(
               child: ElevatedButton(
                 onPressed: () async {
-                  //
                   final uid = FirebaseAuth.instance.currentUser?.uid;
                   if (uid == null) return;
-                  //
+
                   // Determine required keys based on givenType.
                   List<String> requiredKeys;
                   if (_challenge!.givenType == 'capital') {
@@ -439,8 +228,7 @@ class _ChallengePageState extends State<ChallengePage> {
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(),
                             child: const Text("OK",
-                            
-                          style: TextStyle(fontSize: 20, color: Colors.black),
+                              style: TextStyle(fontSize: 20, color: Colors.black),
                             ),
                           ),
                         ],
@@ -455,7 +243,7 @@ class _ChallengePageState extends State<ChallengePage> {
                   _selectedAnswers.forEach((key, value) {
                     if (value == correctAnswers[key]) {
                       correctCount++;
-                      }else{
+                    } else {
                       isCorrect = false;
                     }
                   });
@@ -479,28 +267,25 @@ class _ChallengePageState extends State<ChallengePage> {
                     builder: (_) => AlertDialog(
                       title: Text(isCorrect ? "Gut gemacht!" : "Nicht alle Antworten stimmen"),
                       content: Text(isCorrect? 
-                      "Alle Antworten sind korrekt.\nScore: $finalScore/${requiredKeys.length}"
-                      :"Versuche es morgen erneut.\nScore: $finalScore/${requiredKeys.length}",
-                          
-                          style: TextStyle(fontSize: 20),
-                          ),
+                        "Alle Antworten sind korrekt.\nScore: $finalScore/${requiredKeys.length}"
+                        :"Versuche es morgen erneut.\nScore: $finalScore/${requiredKeys.length}",
+                        style: TextStyle(fontSize: 20),
+                      ),
                       actions: [
                         TextButton(
                           onPressed: () {
                             Navigator.of(context).pop();
                           },
                           child: const Text("OK",
-                          style: TextStyle(fontSize: 20, color: Colors.black),
+                            style: TextStyle(fontSize: 20, color: Colors.black),
                           ),
                         )
                       ],
                     ),
                   );
                 },
-                
                 child: const Text("Validieren",
                   style: TextStyle(fontSize: 40, color: Colors.orange),
-                
                 ),
               ),
             ),
@@ -549,7 +334,7 @@ class _ChallengePageState extends State<ChallengePage> {
               }
               return ChoiceChip(
                 label: Text(displayOption(questionKey, option),
-                style: TextStyle(color:Colors.black, fontSize: 20),
+                  style: TextStyle(color:Colors.black, fontSize: 20),
                 ),
                 selected: showAsSelected,
                 selectedColor: chipColor,
@@ -587,7 +372,9 @@ class _ChallengePageState extends State<ChallengePage> {
             children: options.map((flagPath) {
               final bool isCorrectOption = flagPath == correctAnswer;
               final bool isUserSelected = selectedOption == flagPath;
-              final bool showAsSelected = _submitted ? (isCorrectOption || isUserSelected) : isUserSelected;
+              final bool showAsSelected = _submitted
+                  ? (isCorrectOption || isUserSelected)
+                  : isUserSelected;
               Color chipColor;
               if (_submitted) {
                 if (isCorrectOption) {
@@ -616,4 +403,3 @@ class _ChallengePageState extends State<ChallengePage> {
     );
   }
 }
-

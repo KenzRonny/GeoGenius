@@ -65,8 +65,8 @@ class DailyChallengeService {
     });
   }
 
-  /////// Retrieves all daily challenges completed by the user.
-  /// Returns a map of DateTime to score (only days with valid scores).
+  /* Retrieves all daily challenges completed by the user.
+  Returns a map of DateTime to score (only days with valid scores).*/
   static Future<Map<DateTime, int>> getMonthlyChallenges(String uid) async {
     final snapshot = await _firestore
         .collection('users')
