@@ -64,7 +64,7 @@ class _HighscoreScreenState extends State<HighscoreScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Highscore Mode'),
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: Colors.grey[200],
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),

@@ -29,7 +29,7 @@ class RawCountryData {
 
   RawCountryData({required this.detailedJsonString, required this.geoJsonString});
 }
-Future<List<Ccountry>> _loadAndMergeCountryDataInBackground(RawCountryData rawData/*Map<String, String> paths*/) async {
+Future<List<Ccountry>> _loadAndMergeCountryDataInBackground(RawCountryData rawData) async {
   final String detailedGeoString = rawData.detailedJsonString;
   final String geoJsonWithPolygonsString = rawData.geoJsonString;
 
