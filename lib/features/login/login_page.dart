@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geo_genius/features/home/ui/home_page.dart';
+import 'package:geo_genius/features/login/password_reset.dart';
 import 'package:geo_genius/features/login/register_page.dart';
 
 
@@ -108,6 +109,16 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const ResetPasswordPage()),
+                  );
+                },
+                child: const Text('Passwort vergessen?'),
+              ),
+
               const SizedBox(height: 30),
               SizedBox(
                 width: double.infinity,
@@ -134,7 +145,6 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(height: 20),
               TextButton(
                 onPressed: () {
-
                   Navigator.push(context, MaterialPageRoute(builder: (context) => const RegisterPage()),
                   );
                 },
