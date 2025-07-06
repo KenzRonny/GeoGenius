@@ -8,7 +8,7 @@ import 'package:geo_genius/features/ranked_mode/screens/start_new_game.dart';
 class RankedRivalPage extends StatelessWidget {
   const RankedRivalPage({super.key});
 
-  Widget buildMatchItem(String opponent, String status, VoidCallback onTap, {String? subtitle}) {
+  Widget buildMatchItem(String opponent, String status, VoidCallback onTap, {String? subtitle, IconData icon = Icons.sports_esports, }) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 6),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -21,8 +21,9 @@ class RankedRivalPage extends StatelessWidget {
           ),
           width: 48,
           height: 48,
-          child: const Icon(Icons.sports_esports, color: Color(0xFF181411)),
+          child: Icon(icon, color: const Color(0xFF181411)),
         ),
+
         title: Text('Spiel gegen $opponent', style: const TextStyle(fontWeight: FontWeight.w600)),
         subtitle: subtitle != null ? Text(subtitle) : null,
         trailing: Text(status, style: const TextStyle(color: Color(0xFF181411))),
@@ -55,11 +56,11 @@ class RankedRivalPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 12),
-              FutureBuilder<DocumentSnapshot>(
-                future: FirebaseFirestore.instance
+              StreamBuilder<DocumentSnapshot>(
+                stream: FirebaseFirestore.instance
                     .collection('users')
                     .doc(currentUser?.uid)
-                    .get(),
+                    .snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const CircularProgressIndicator();
@@ -164,12 +165,24 @@ class RankedRivalPage extends StatelessWidget {
                                 ? (data['players']['player2']?['name'] ?? 'Gegner gesucht')
                                 : (data['players']['player1']?['name'] ?? 'Gegner gesucht');
 
-                            return buildMatchItem(opponent, 'Läuft', () {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(builder: (_) => GameScreen(matchId: doc.id)),
-                              );
-                            });
+                            final isPlayer1 = currentUser?.uid == data['players']['player1']['id'];
+                            final hasPlayed = isPlayer1
+                                ? data['players']['player1']['hasPlayed'] == true
+                                : data['players']['player2']['hasPlayed'] == true;
+                            return buildMatchItem(
+                              opponent,
+                              'Läuft',
+                              hasPlayed
+                                  ? () {}  // Kein onTap, da schon gespielt
+                                  : () {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(builder: (_) => GameScreen(matchId: doc.id)),
+                                );
+                              },
+                              subtitle: hasPlayed ? 'Du hast schon gespielt' : null,
+                              icon: hasPlayed ? Icons.hourglass_bottom : Icons.sports_esports,
+                            );
                           }),
                           const SizedBox(height: 20),
                           Text('Abgeschlossene Spiele', style: theme.textTheme.titleLarge),
