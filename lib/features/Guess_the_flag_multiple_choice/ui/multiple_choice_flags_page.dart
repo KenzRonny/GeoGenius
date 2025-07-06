@@ -115,7 +115,7 @@ class _MultipleChoiceScreenState extends State<MultipleChoiceScreen>{
                   Text(
                     'Streak',
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 14,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),

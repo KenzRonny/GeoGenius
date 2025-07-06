@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter/foundation.dart';
 import '../domain/models/Countries_capital.dart';
+import '../domain/models/RawCountryData_capital.dart';
 
 // Hilfsfunktion für Polygon-Konvertierung
 List<LatLng> _convertPolygonCoordinates(List<dynamic> coordinates){
@@ -23,12 +24,7 @@ List<LatLng> _convertPolygonCoordinates(List<dynamic> coordinates){
   }).toList();
 }
 
-class RawCountryData {
-  final String detailedJsonString;
-  final String geoJsonString;
 
-  RawCountryData({required this.detailedJsonString, required this.geoJsonString});
-}
 Future<List<Ccountry>> _loadAndMergeCountryDataInBackground(RawCountryData rawData) async {
   final String detailedGeoString = rawData.detailedJsonString;
   final String geoJsonWithPolygonsString = rawData.geoJsonString;
