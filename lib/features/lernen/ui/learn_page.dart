@@ -49,11 +49,6 @@ class _LearnPageState extends State<LearnPage> {
       .replaceAll('å', 'ae');
 }
     
-   /* jsonData.sort(
-      (a, b) => (a["translations"]["deu"]["common"] as String).compareTo(
-        b["translations"]["deu"]["common"] as String,
-      ),
-    );*/
     jsonData.sort((a, b) {
   final String aName = normalizeName(a["translations"]["deu"]["common"] as String);
   final String bName = normalizeName(b["translations"]["deu"]["common"] as String);
@@ -95,6 +90,68 @@ class _LearnPageState extends State<LearnPage> {
           }).toList();
     });
   }
+  
+/// Displays a detailed info dialog for the tapped country
+  void _showCountryDetails(dynamic country) {
+    final String name =
+        country["translations"]["deu"]["common"] ?? "Unknown";
+    final dynamic capitalData = country["capital"];
+    List<dynamic> capitalList = [];
+    if (capitalData is List) {
+      capitalList = capitalData;
+    } else if (capitalData is String) {
+      capitalList = [capitalData];
+    }
+    final String capital = capitalList.isNotEmpty
+        ? capitalList.first.toString()
+        : "No capital";
+    final String flagUrl = country["flags"]?["png"] ?? "";
+    final String continent = (country["region"] is List
+            ? (country["region"] as List).first
+            : country["region"])
+        .toString();
+    final String population =
+        (country["population"] ?? "Unknown").toString();
+    final String area = (country["area"] ?? "Unknown").toString();
+    final List<dynamic> langData = country["languages"] is Map
+        ? (country["languages"] as Map).values.toList()
+        : [];
+    final String languages =
+        langData.map((l) => l.toString()).join(', ');
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(name),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (flagUrl.isNotEmpty)
+                Image.network(flagUrl, height: 100)
+              else
+                const Icon(Icons.flag, size: 100),
+              const SizedBox(height: 12),
+              Text("Hauptstadt: $capital"),
+              Text("Kontinent: $continent"),
+              Text("Einwohner: $population"),
+              Text("Fläche (km²): $area"),
+              Text("Sprachen: $languages"),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("Schließen", 
+            style: TextStyle(color: Colors.deepOrange),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
 
   @override
   void initState() {
@@ -115,21 +172,16 @@ class _LearnPageState extends State<LearnPage> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
+        backgroundColor: Colors.amber[50],
         body: CustomScrollView(
           slivers: [
             // collapsible app bar integrated into the scrollable view.
             SliverAppBar(
               pinned: true,
-              backgroundColor: Theme.of(context).primaryColor,
+              backgroundColor: Colors.amber[800],
               expandedHeight: 50,
               title: const Text(title, style: TextStyle(color: Colors.white)),
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
-                color: Colors.white,
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-              ),
+              
               actions: [
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -226,10 +278,15 @@ class _LearnPageState extends State<LearnPage> {
                   ),
                   delegate: SliverChildBuilderDelegate((
                     BuildContext context,
-                    int index,
-                  ) {
+                    int index,) {
                     final country = filteredCountries[index];
-                    return CountryItemGrid(index: index, country: country);
+                    
+                    // wrap grid item with tap to show Countries Details
+                    return
+                    InkWell(
+                      onTap: () => _showCountryDetails(country),
+                      child: CountryItemGrid(index: index, country: country),
+                    );
                   }, childCount: filteredCountries.length),
                 )
                 : displayMode == "flashcard"
@@ -239,7 +296,14 @@ class _LearnPageState extends State<LearnPage> {
                     int index,
                   ) {
                     final country = filteredCountries[index];
-                    return CountryItemFlashcard(index: index, country: country);
+                    
+
+                    ///wrap flashcard item with tap to show Countries Details
+                    return
+                    InkWell(
+                      onTap: ()=>_showCountryDetails(country),
+                      child: CountryItemFlashcard(index: index, country: country),
+                    );
                   }, childCount: filteredCountries.length),
                 )
                 : // Default list display
@@ -249,7 +313,13 @@ class _LearnPageState extends State<LearnPage> {
                     int index,
                   ) {
                     final country = filteredCountries[index];
-                    return CountryItemList(index: index, country: country);
+                    
+                    ///wrap flashcard item with tap to show Countries Details
+                    return
+                    InkWell(
+                      onTap: ()=>_showCountryDetails(country),
+                      child: CountryItemList(index: index, country: country),
+                    );
                   }, childCount: filteredCountries.length),
                 ),
           ],

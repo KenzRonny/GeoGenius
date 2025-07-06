@@ -152,7 +152,7 @@ class _HighscoreScreenState extends State<HighscoreScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Scaffold
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Highscore Hero', textAlign: TextAlign.center,),
