@@ -41,7 +41,7 @@
     void initState() {
       super.initState();
       _zoomPanBehavior = MapZoomPanBehavior(
-        enableDoubleTapZooming: true,
+        enableDoubleTapZooming: false,
         enablePinching: true,
         enableMouseWheelZooming: true,
         toolbarSettings: const MapToolbarSettings(
@@ -153,7 +153,7 @@
         setState(() {
           _selectedIndex = index;
           _remainingCountriesForGame.removeWhere((country) => country.name == tappedCountry.name);
-          _zoomPanBehavior.reset();
+          //_zoomPanBehavior.reset();
           _currentZoomLevel = _zoomPanBehavior.zoomLevel;
         });
 
@@ -169,7 +169,9 @@
           });
         }
 
-        await Future.delayed(const Duration(seconds: 1));
+        await Future.delayed(const Duration(seconds: 2));
+        _zoomPanBehavior.reset();
+        _currentZoomLevel = _zoomPanBehavior.zoomLevel;
         _setNextCapitalQuestion();
       } else {
         setState(() {
@@ -178,6 +180,7 @@
         });
 
         if (_attemptCounter >= 3) {
+          await Future.delayed(const Duration(milliseconds: 700));
           setState(() {
             if (_correctCountryForQuestion != null) {
               _selectedIndex = _allCountries.indexOf(_correctCountryForQuestion!);
@@ -193,7 +196,7 @@
               }
             }
           });
-          setState(() {});
+
           await Future.delayed(const Duration(seconds: 2));
 
             _zoomPanBehavior.reset();
