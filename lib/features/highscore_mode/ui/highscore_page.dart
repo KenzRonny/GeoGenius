@@ -1,12 +1,14 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
 import 'dart:math';
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../home/data/countries_data.dart';
 
 class HighscoreScreen extends StatefulWidget {
   const HighscoreScreen({super.key});
 
   @override
-  _HighscoreScreenState createState() => _HighscoreScreenState();
+  State<HighscoreScreen> createState() => _HighscoreScreenState();
 }
 
 class _HighscoreScreenState extends State<HighscoreScreen> {
@@ -17,12 +19,57 @@ class _HighscoreScreenState extends State<HighscoreScreen> {
   List<String> currentSuggestions = [];
 
   int score = 0;
+  int highscore = 0;
+  int timeLeft = 60;
   String feedback = '';
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
+    _loadHighscore();
     _generateQuestion();
+    _startTimer();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadHighscore() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      highscore = prefs.getInt('highscore') ?? 0;
+    });
+  }
+
+  Future<void> _updateHighscore() async {
+    if (score > highscore) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('highscore', score);
+      setState(() {
+        highscore = score;
+      });
+    }
+  }
+
+  void _startTimer() {
+    _timer?.cancel();
+    timeLeft = 60;
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        if (timeLeft > 0) {
+          timeLeft--;
+        } else {
+          timer.cancel();
+          _updateHighscore();
+          _showEndDialog();
+        }
+      });
+    });
   }
 
   void _generateQuestion() {
@@ -35,8 +82,6 @@ class _HighscoreScreenState extends State<HighscoreScreen> {
     feedback = '';
     _controller.clear();
     _autoCompleteController?.clear();
-
-    setState(() {});
   }
 
   void _checkAnswer([String? submitted]) {
@@ -44,105 +89,160 @@ class _HighscoreScreenState extends State<HighscoreScreen> {
 
     if (answer.toLowerCase() == correctCountry.toLowerCase()) {
       score++;
-      feedback = 'Richtig!';
-    } else {
-      score = 0;
-      feedback = 'Falsch: $correctCountry';
+      feedback = '✅ Richtig!';
+      if (score > highscore) {
+        highscore = score;
+        _updateHighscore();
+      }
+    }
+    else {
+      feedback = '❌ Falsch! Richtige Antwort: $correctCountry';
     }
 
     setState(() {
       _controller.clear();
-      _autoCompleteController?.clear(); // Sichtbares Feld leeren
+      _autoCompleteController?.clear();
     });
 
-    Future.delayed(const Duration(seconds: 2), () {
-      _generateQuestion();
+    Future.delayed(const Duration(seconds: 1), () {
+      setState(() {
+        _generateQuestion();
+      });
     });
   }
+
+  void _showEndDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        title: const Text("⏰ Zeit abgelaufen"),
+        content: Text("Dein Score: $score\nHighscore: $highscore"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Zurück"),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              setState(() {
+                score = 0;
+                feedback = '';
+                _generateQuestion();
+                _startTimer();
+              });
+            },
+            child: const Text("Nochmal spielen"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildScoreRow() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text("Punkte: $score", style: const TextStyle(fontSize: 20)),
+        Text("Bestwert: $highscore", style: const TextStyle(fontSize: 20)),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Highscore Mode'),
-        backgroundColor: Theme.of(context).primaryColor,
+        title: const Text('Highscore Hero', textAlign: TextAlign.center,),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Highscore: $score', style: const TextStyle(fontSize: 24)),
+            Align(
+              alignment: Alignment.topRight,
+              child: Text(
+                "🕒 $timeLeft s",
+                style: TextStyle(color: Colors.grey[600], fontSize: 14),
+              ),
+            ),
+            const SizedBox(height: 4),
+            _buildScoreRow(),
             const SizedBox(height: 20),
-            Image.asset(flagPath, height: 150),
+            Center(child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.grey[200], // Heller neutraler Hintergrund, damit weiße flaggen besser erkennt
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Image.asset(flagPath, height: 150),
+            ),
+            ),
             const SizedBox(height: 20),
             Autocomplete<String>(
-              optionsBuilder: (TextEditingValue textEditingValue) {
-                if (textEditingValue.text.isEmpty) {
-                  currentSuggestions = [];
-                  return const Iterable<String>.empty();
-                }
-
-                currentSuggestions = CountryData.countries.keys.where((String country) {
-                  return country.toLowerCase().contains(textEditingValue.text.toLowerCase());
+              optionsBuilder: (value) {
+                if (value.text.isEmpty) return const Iterable<String>.empty();
+                currentSuggestions = CountryData.countries.keys.where((country) {
+                  return country.toLowerCase().contains(value.text.toLowerCase());
                 }).toList();
-
                 return currentSuggestions;
               },
-              onSelected: (String selection) {
+              onSelected: (selection) {
                 _controller.text = selection;
-                _checkAnswer(selection); // Direkt checken bei Auswahl
+                _checkAnswer(selection);
               },
-              fieldViewBuilder:
-                  (context, textEditingController, focusNode, onFieldSubmitted) {
-                _autoCompleteController = textEditingController;
-
-                // Synchronisiere alle Eingaben mit dem Hauptcontroller
-                textEditingController.addListener(() {
-                  _controller.text = textEditingController.text;
+              fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
+                _autoCompleteController = controller;
+                controller.addListener(() {
+                  _controller.text = controller.text;
                 });
 
                 return TextField(
-                  controller: textEditingController,
+                  controller: controller,
                   focusNode: focusNode,
-                  onSubmitted: (value) {
-                    final trimmed = value.trim();
-
-                    // Wenn die Eingabe exakt einem Land entspricht, checke direkt
-                    if (CountryData.countries.keys.any((country) =>
-                    country.toLowerCase() == trimmed.toLowerCase())) {
-                      _checkAnswer(trimmed);
-                    }
-                    // Falls Tipp + Suggestion übereinstimmen, nutze das erste Matching
-                    else if (currentSuggestions.isNotEmpty) {
-                      final bestMatch = currentSuggestions.firstWhere(
-                            (c) => c.toLowerCase().startsWith(trimmed.toLowerCase()),
-                        orElse: () => trimmed,
-                      );
-                      _checkAnswer(bestMatch);
-                    } else {
-                      // Wenn nichts passt, prüfe trotzdem das Eingegebene
-                      _checkAnswer(trimmed);
-                    }
-                  },
-
-                  decoration: const InputDecoration(
+                  onSubmitted: _checkAnswer,
+                  decoration: InputDecoration(
                     labelText: 'Land eingeben',
-                    border: OutlineInputBorder(),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                   ),
                 );
               },
             ),
-
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: _checkAnswer,
-              child: const Text('Antwort prüfen'),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _checkAnswer,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFE0E0E0),
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                ),
+                child: const Text('Antwort prüfen', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
             ),
-            const SizedBox(height: 10),
-            Text(feedback, style: const TextStyle(fontSize: 18)),
+            const SizedBox(height: 12),
+            Center(
+              child: Text(
+                feedback,
+                style: const TextStyle(fontSize: 18),
+                textAlign: TextAlign.center,
+              ),
+            ),
           ],
         ),
       ),
