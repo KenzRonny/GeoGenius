@@ -34,10 +34,9 @@ class ProfilePage extends StatelessWidget {
             final name = data['name'] ?? 'Unbekannt';
             final email = user.email ?? '';
             final avatarUrl = data['avatarurl'];
-            final int points = (data['rankedPoints'] ?? 0) is int
+            final int points = (data['rankedPoints'] is int)
                 ? data['rankedPoints']
-                : int.tryParse(data['rankedPoints'].toString()) ?? 0;
-
+                : int.tryParse(data['rankedPoints']?.toString() ?? '0') ?? 0;
             String rank = '';
             if (points >= 200) {
               rank = 'Gold 🥇';
