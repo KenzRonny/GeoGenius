@@ -70,7 +70,6 @@ class _GameScreenState extends State<GameScreen> {
         ],
       ),
     );
-
     updatePlayerScore();
     showDialog(
       context: context,

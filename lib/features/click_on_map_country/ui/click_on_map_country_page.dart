@@ -364,10 +364,6 @@ class _ClickOnMapPage extends State<ClickOnMapPage> {
         ],
 
       ),
-
-
-
-
     );
   }
 }
