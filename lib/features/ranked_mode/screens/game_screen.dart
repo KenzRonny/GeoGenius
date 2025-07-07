@@ -71,6 +71,7 @@ class _GameScreenState extends State<GameScreen> {
       ),
     );
     updatePlayerScore();
+    if(!mounted) return;
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -169,13 +170,13 @@ class _GameScreenState extends State<GameScreen> {
           final pop = selectedCountry!['population'];
           return pop >= 1000000
               ? '${(pop / 1000000).round()} Mio.'
-              : '${pop.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')}';
+              : pop.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+$)'), (m) => '${m[1]}.');
         })(),
         'options': (() {
           final pop = selectedCountry!['population'];
           final correctFormatted = pop >= 1000000
               ? '${(pop / 1000000).round()} Mio.'
-              : '${pop.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')}';
+              : pop.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+$)'), (m) => '${m[1]}.');
 
           final Set<String> optionsSet = {};
 
@@ -189,7 +190,7 @@ class _GameScreenState extends State<GameScreen> {
 
             final formatted = randPop >= 1000000
                 ? '${(randPop / 1000000).round()} Mio.'
-                : '${randPop.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')}';
+                : randPop.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+$)'), (m) => '${m[1]}.');
 
             optionsSet.add(formatted);
           }
@@ -236,6 +237,7 @@ class _GameScreenState extends State<GameScreen> {
       } else {
         timer.cancel();
         updatePlayerScore();
+        if(!mounted) return;
         showDialog(
           context: context,
           builder: (_) => AlertDialog(

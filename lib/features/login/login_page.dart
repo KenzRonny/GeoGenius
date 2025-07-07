@@ -25,12 +25,12 @@ class _LoginPageState extends State<LoginPage> {
           password: _passwordController.text.trim()
       );
 
+      if (!mounted) return;
       if (credential.user != null) {
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const MyHomePage()),
         );
       }
     } on FirebaseAuthException catch (e) {
-      print('Fehlercode: ${e.code}');
       String errorMessage;
 
       if (e.code == 'invalid-email') {
@@ -159,5 +159,4 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
   }
-
 }

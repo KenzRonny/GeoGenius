@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../main.dart';
+
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
@@ -113,6 +115,13 @@ class ProfilePage extends StatelessWidget {
 
                         if (confirmed == true) {
                           await FirebaseAuth.instance.signOut();
+
+                          // Alle alten Routen löschen und zu AuthGate zurück
+                          Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(builder: (_) => const AuthGate()),
+                                (route) => false,
+                          );
+
                         }
                       },
                       style: ElevatedButton.styleFrom(
