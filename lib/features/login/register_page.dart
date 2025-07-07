@@ -47,6 +47,7 @@ class _RegisterPageState extends State<RegisterPage> {
           'createdAt': FieldValue.serverTimestamp(),
           'rankedPoint': '0',
         });
+        if(!mounted) return;
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const MyHomePage()),
@@ -64,7 +65,7 @@ class _RegisterPageState extends State<RegisterPage> {
       } else {
         errorMessage = 'Registrierung fehlgeschlagen.';
       }
-
+      if(!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(errorMessage)),
       );

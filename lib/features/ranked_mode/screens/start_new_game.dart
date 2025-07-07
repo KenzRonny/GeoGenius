@@ -45,7 +45,7 @@ class _StartNewGameScreenState extends State<StartNewGameScreen> {
     });
 
     setState(() => _isLoading = false);
-
+    if(!mounted) return;
     showDialog(
       context: context,
       builder: (_) => AlertDialog(

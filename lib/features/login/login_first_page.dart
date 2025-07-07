@@ -7,41 +7,51 @@ import 'login_page.dart';
 import 'register_page.dart';
 import '../home/ui/home_page.dart'; // ggf. Pfad anpassen
 
-class FirstLoginPage extends StatelessWidget {
+class FirstLoginPage extends StatefulWidget {
   const FirstLoginPage({super.key});
 
+  @override
+  State<FirstLoginPage> createState() => _FirstLoginPageState();
+}
+
+class _FirstLoginPageState extends State<FirstLoginPage> {
+
   Future<void> _signInAnonymously(BuildContext context) async {
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+
     try {
       final userCredential = await FirebaseAuth.instance.signInAnonymously();
       final user = userCredential.user;
 
       if (user != null) {
-        final userDoc = FirebaseFirestore.instance.collection('users').doc(user.uid);
+        final userDoc = FirebaseFirestore.instance.collection('users').doc(
+            user.uid);
 
         // Nur erstellen, wenn es das Dokument noch nicht gibt
         final docSnapshot = await userDoc.get();
         if (!docSnapshot.exists) {
           // Zufälligen Namen generieren: z.B. guest_837492
-          final randomNumber = Random().nextInt(900000) + 100000; // 6-stellige Zahl
+          final randomNumber = Random().nextInt(900000) +
+              100000; // 6-stellige Zahl
           final guestName = 'guest_$randomNumber';
 
           await userDoc.set({
             'name': guestName,
             'avatarUrl': '', // Optional: Standardbild
-            'rank': '-',     // Optional: Standardrang
+            'rank': '-', // Optional: Standardrang
             'rankedPoints': 0,
             'isGuest': true,
             'createdAt': FieldValue.serverTimestamp(),
           });
         }
-
-        Navigator.pushReplacement(
-          context,
+        if (!mounted) return;
+        navigator.pushReplacement(
           MaterialPageRoute(builder: (_) => const MyHomePage()),
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(content: Text('Fehler beim Gast-Login: $e')),
       );
     }
