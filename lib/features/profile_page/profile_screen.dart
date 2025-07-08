@@ -4,9 +4,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../main.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
@@ -115,7 +120,7 @@ class ProfilePage extends StatelessWidget {
 
                         if (confirmed == true) {
                           await FirebaseAuth.instance.signOut();
-
+                          if (!context.mounted) return;
                           // Alle alten Routen löschen und zu AuthGate zurück
                           Navigator.of(context).pushAndRemoveUntil(
                             MaterialPageRoute(builder: (_) => const AuthGate()),

@@ -104,6 +104,7 @@ class _DailyChallengeHomePageState extends State<DailyChallengeHomePage> {
               final alreadyDone =
                   await DailyChallengeService.isChallengeDone(uid);
               if (alreadyDone) {
+                if (!context.mounted) return;
                 showDialog(
                   context: context,
                   builder: (_) => const AlertDialog(
@@ -113,6 +114,7 @@ class _DailyChallengeHomePageState extends State<DailyChallengeHomePage> {
                   ),
                 );
               } else {
+                if (!context.mounted) return;
                 await Navigator.push(
                   context,
                   MaterialPageRoute(
