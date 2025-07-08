@@ -164,8 +164,13 @@ class _HighscoreScreenState extends State<HighscoreScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.only(
+            left: 24,
+            right: 24,
+            top: 16,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
