@@ -262,6 +262,7 @@ class _ChallengePageState extends State<ChallengePage> {
                     score: finalScore,
                     answers: userAnswers,
                   );
+                  if (!context.mounted) return;
                   showDialog(
                     context: context,
                     builder: (_) => AlertDialog(
